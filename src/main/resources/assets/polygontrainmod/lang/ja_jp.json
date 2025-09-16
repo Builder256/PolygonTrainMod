@@ -1,0 +1,14 @@
+{
+  "itemGroup.polygontrainmod": "てすとmod",
+  "block.polygontrainmod.example_block": "例 Block",
+  "item.polygontrainmod.example_item": "例 Item",
+  "item.polygontrainmod.test_ticket": "テスト切符",
+
+  "polygontrainmod.configuration.title": "てすとmod Configs",
+  "polygontrainmod.configuration.section.polygontrainmod.common.toml": "てすとmod Configs",
+  "polygontrainmod.configuration.section.polygontrainmod.common.toml.title": "てすとmod Configs",
+  "polygontrainmod.configuration.items": "Item List",
+  "polygontrainmod.configuration.logDirtBlock": "Log Dirt Block",
+  "polygontrainmod.configuration.magicNumberIntroduction": "Magic Number Text",
+  "polygontrainmod.configuration.magicNumber": "Magic Number"
+}

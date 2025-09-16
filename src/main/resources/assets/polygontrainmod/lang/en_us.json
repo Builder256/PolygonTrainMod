@@ -1,0 +1,13 @@
+{
+  "itemGroup.polygontrainmod": "PolygonTrainMod",
+  "block.polygontrainmod.example_block": "Example Block",
+  "item.polygontrainmod.example_item": "Example Item",
+
+  "polygontrainmod.configuration.title": "PolygonTrainMod Configs",
+  "polygontrainmod.configuration.section.polygontrainmod.common.toml": "PolygonTrainMod Configs",
+  "polygontrainmod.configuration.section.polygontrainmod.common.toml.title": "PolygonTrainMod Configs",
+  "polygontrainmod.configuration.items": "Item List",
+  "polygontrainmod.configuration.logDirtBlock": "Log Dirt Block",
+  "polygontrainmod.configuration.magicNumberIntroduction": "Magic Number Text",
+  "polygontrainmod.configuration.magicNumber": "Magic Number"
+}
