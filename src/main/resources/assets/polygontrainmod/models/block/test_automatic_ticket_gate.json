@@ -1,0 +1,20 @@
+{
+  "parent": "minecraft:block/block",
+  "elements": [
+    {
+      "from": [0, 0, 0],
+      "to": [16, 8, 16],
+      "faces": {
+        "up": { "texture": "#texture" },
+        "down": { "texture": "#texture" },
+        "north": { "texture": "#texture" },
+        "south": { "texture": "#texture" },
+        "west": { "texture": "#texture" },
+        "east": { "texture": "#texture" }
+      }
+    }
+  ],
+  "textures": {
+    "texture": "polygontrainmod:block/test_block"
+  }
+}
