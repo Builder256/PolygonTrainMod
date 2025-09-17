@@ -1,7 +1,5 @@
 package com.portofino.polygondtrainmod;
 
-import com.portofino.polygondtrainmod.block.GateBlock;
-import net.minecraft.world.level.block.SoundType;
 import org.slf4j.Logger;
 
 import com.mojang.logging.LogUtils;
@@ -9,14 +7,10 @@ import com.mojang.logging.LogUtils;
 //import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
-import net.minecraft.world.food.FoodProperties;
-import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.CreativeModeTabs;
-import net.minecraft.world.item.Item;
 //import net.minecraft.world.level.block.Block;
 //import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.state.BlockBehaviour;
 //import net.minecraft.world.level.material.MapColor;
 //import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.IEventBus;
@@ -28,9 +22,7 @@ import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
 //import net.neoforged.neoforge.common.NeoForge;
 //import net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent;
 //import net.neoforged.neoforge.event.server.ServerStartingEvent;
-import net.neoforged.neoforge.registries.DeferredBlock;
 import net.neoforged.neoforge.registries.DeferredHolder;
-import net.neoforged.neoforge.registries.DeferredItem;
 import net.neoforged.neoforge.registries.DeferredRegister;
 
 // この値はMETA-INF/neoforge.mods.tomlファイルの入力と一致する必要があります。
@@ -40,10 +32,6 @@ public class PolygonTrainMod {
     public static final String MODID = "polygontrainmod";
     // slf4j ロガーを直接参照する
     public static final Logger LOGGER = LogUtils.getLogger();
-    // すべてのブロックを "polygontrainmod "名前空間に登録するために、Deferred Registerを作成する。
-    public static final DeferredRegister.Blocks BLOCKS = DeferredRegister.createBlocks(MODID);
-    // Polygontrainmod "名前空間に登録されるアイテムを保持するために、Deferred Registerを作成する。
-    public static final DeferredRegister.Items ITEMS = DeferredRegister.createItems(MODID);
     // CreativeModeTabsを保持するDeferred Registerを作成し、すべて "polygontrainmod "ネームスペースに登録する。
     public static final DeferredRegister<CreativeModeTab> CREATIVE_MODE_TABS = DeferredRegister.create(Registries.CREATIVE_MODE_TAB, MODID);
 
@@ -52,32 +40,19 @@ public class PolygonTrainMod {
     // 名前空間とパスを組み合わせて、id "polygontrainmod:example_block "の新しいBlockItemを作成します。
 //    public static final DeferredItem<BlockItem> EXAMPLE_BLOCK_ITEM = ITEMS.registerSimpleBlockItem("example_block", EXAMPLE_BLOCK);
 
-    // id "polygontrainmod:example_id"、栄養度1、彩度2の新しい食品を作成する。
-    public static final DeferredItem<Item> EXAMPLE_ITEM = ITEMS.registerSimpleItem("example_item", new Item.Properties().food(new FoodProperties.Builder()
-            .alwaysEdible().nutrition(1).saturationModifier(2f).build()));
-
-
     /* ~~~~~~~~~~ 以下DeferredHolderへの登録 ~~~~~~~~~~ */
-
-    // テスト切符を登録
-    public static final DeferredItem<Item> TEST_TICKET = ITEMS.registerSimpleItem("test_ticket", new Item.Properties().stacksTo(1));
-    // テスト改札機を登録
-    public static final DeferredBlock<GateBlock> TEST_AUTOMATIC_TICKET_GATE = BLOCKS.register("test_automatic_ticket_gate", ()-> new GateBlock(BlockBehaviour.Properties.of().sound(SoundType.STONE)));
-    // テスト改札機のブロックアイテムを登録
-    // インベントリに追加するにはブロックアイテムがないといけない
-    public static final DeferredItem<BlockItem> TEST_AUTOMATIC_TICKET_GATE_ITEM = ITEMS.registerSimpleBlockItem("test_automatic_ticket_gate", TEST_AUTOMATIC_TICKET_GATE);
 
     // 戦闘タブの後に配置される、idが"polygontrainmod:example_tab"のクリエイティブタブを登録
     public static final DeferredHolder<CreativeModeTab, CreativeModeTab> EXAMPLE_TAB = CREATIVE_MODE_TABS.register("example_tab", () -> CreativeModeTab.builder()
             .title(Component.translatable("itemGroup.polygontrainmod")) //CreativeModeTabのタイトルの言語キー
             .withTabsBefore(CreativeModeTabs.COMBAT)
-            .icon(() -> TEST_TICKET.get().getDefaultInstance())
+            .icon(() -> PolygonTrainModItems.TEST_TICKET.get().getDefaultInstance())
             .displayItems((parameters, output) -> {
-                output.accept(EXAMPLE_ITEM.get()); // サンプルアイテムをタブに追加します。独自のタブの場合は、イベントよりもこの方法が推奨されます。
+                output.accept(PolygonTrainModItems.EXAMPLE_ITEM.get()); // サンプルアイテムをタブに追加します。独自のタブの場合は、イベントよりもこの方法が推奨されます。
 
-                output.accept(TEST_TICKET.get());
+                output.accept(PolygonTrainModItems.TEST_TICKET.get());
                 // インベントリに作成したブロックアイテムを追加する、ブロックを直接登録しても自動でブロックアイテムを探索してやってくれるらしい
-                output.accept(TEST_AUTOMATIC_TICKET_GATE_ITEM.get());
+                output.accept(PolygonTrainModItems.TEST_AUTOMATIC_TICKET_GATE_ITEM.get());
             }).build());
 
     // MODクラスのコンストラクタは、MODがロードされたときに最初に実行されるコードです。
@@ -87,9 +62,9 @@ public class PolygonTrainMod {
         modEventBus.addListener(this::commonSetup);
 
         // DeferredレジスタをMODイベントバスに登録し、ブロックが登録されるようにする
-        BLOCKS.register(modEventBus);
+        PolygonTrainModBlocks.BLOCKS.register(modEventBus);
         // MODイベントバスにDeferred Registerを登録し、アイテムが登録されるようにする。
-        ITEMS.register(modEventBus);
+        PolygonTrainModItems.ITEMS.register(modEventBus);
         // MODイベントバスにDeferred Registerを登録し、タブが登録されるようにする。
         CREATIVE_MODE_TABS.register(modEventBus);
 
