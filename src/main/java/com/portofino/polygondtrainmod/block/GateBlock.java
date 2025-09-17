@@ -8,8 +8,8 @@ public class GateBlock extends Block {
 //    public static final DirectionProperty FACING = BlockStateProperties.FACING;
 //    public static final BooleanProperty OPEN = BooleanProperty.create("open");
 
-    public  GateBlock(BlockBehaviour.Properties pPropterties) {
-        super(pPropterties);
+    public  GateBlock(BlockBehaviour.Properties properties) {
+        super(properties);
 
     }
 }

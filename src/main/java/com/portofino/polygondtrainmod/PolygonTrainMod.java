@@ -1,5 +1,7 @@
 package com.portofino.polygondtrainmod;
 
+import com.portofino.polygondtrainmod.block.GateBlock;
+import net.minecraft.world.level.block.SoundType;
 import org.slf4j.Logger;
 
 import com.mojang.logging.LogUtils;
@@ -54,18 +56,18 @@ public class PolygonTrainMod {
     public static final DeferredItem<Item> EXAMPLE_ITEM = ITEMS.registerSimpleItem("example_item", new Item.Properties().food(new FoodProperties.Builder()
             .alwaysEdible().nutrition(1).saturationModifier(2f).build()));
 
+
+    /* ~~~~~~~~~~ 以下DeferredHolderへの登録 ~~~~~~~~~~ */
+
+    // テスト切符を登録
     public static final DeferredItem<Item> TEST_TICKET = ITEMS.registerSimpleItem("test_ticket", new Item.Properties().stacksTo(1));
+    // テスト改札機を登録
+    public static final DeferredBlock<GateBlock> TEST_AUTOMATIC_TICKET_GATE = BLOCKS.register("test_automatic_ticket_gate", ()-> new GateBlock(BlockBehaviour.Properties.of().sound(SoundType.STONE)));
+    // テスト改札機のブロックアイテムを登録
+    // インベントリに追加するにはブロックアイテムがないといけない
+    public static final DeferredItem<BlockItem> TEST_AUTOMATIC_TICKET_GATE_ITEM = ITEMS.registerSimpleBlockItem("test_automatic_ticket_gate", TEST_AUTOMATIC_TICKET_GATE);
 
-
-
-
-
-
-
-
-
-
-    // 戦闘タブの後に配置される、例アイテムのためのid "polygontrainmod:example_tab "を持つクリエイティブなタブを作成します。
+    // 戦闘タブの後に配置される、idが"polygontrainmod:example_tab"のクリエイティブタブを登録
     public static final DeferredHolder<CreativeModeTab, CreativeModeTab> EXAMPLE_TAB = CREATIVE_MODE_TABS.register("example_tab", () -> CreativeModeTab.builder()
             .title(Component.translatable("itemGroup.polygontrainmod")) //CreativeModeTabのタイトルの言語キー
             .withTabsBefore(CreativeModeTabs.COMBAT)
@@ -73,11 +75,9 @@ public class PolygonTrainMod {
             .displayItems((parameters, output) -> {
                 output.accept(EXAMPLE_ITEM.get()); // サンプルアイテムをタブに追加します。独自のタブの場合は、イベントよりもこの方法が推奨されます。
 
-
-
-
-
                 output.accept(TEST_TICKET.get());
+                // インベントリに作成したブロックアイテムを追加する、ブロックを直接登録しても自動でブロックアイテムを探索してやってくれるらしい
+                output.accept(TEST_AUTOMATIC_TICKET_GATE_ITEM.get());
             }).build());
 
     // MODクラスのコンストラクタは、MODがロードされたときに最初に実行されるコードです。
