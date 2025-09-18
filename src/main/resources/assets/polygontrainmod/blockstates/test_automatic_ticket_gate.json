@@ -34,7 +34,7 @@
       "uvlock": true
     },
     "facing=west,open=true": {
-      "model": "polygontrainmod:block/test_automatic_ticket_gateopene",
+      "model": "polygontrainmod:block/test_automatic_ticket_gate_open",
       "y": 270,
       "uvlock": true
     }
