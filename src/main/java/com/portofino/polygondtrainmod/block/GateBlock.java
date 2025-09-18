@@ -1,9 +1,16 @@
 package com.portofino.polygondtrainmod.block;
 
+import com.portofino.polygondtrainmod.PolygonTrainMod;
+import com.portofino.polygondtrainmod.PolygonTrainModItems;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.ItemInteractionResult;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
@@ -12,6 +19,7 @@ import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.block.state.properties.DirectionProperty;
+import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
@@ -35,7 +43,6 @@ public class GateBlock extends Block {
 
     /**
      * BlockStateを追加
-     * @param pBuilder
      */
     @Override
     protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> pBuilder) {
@@ -44,8 +51,6 @@ public class GateBlock extends Block {
 
     /**
      * 設置時のプレイヤーの視点の向きに応じて設置の向きを設定
-     * @param pContext
-     * @return
      */
     @Override
     @Nullable
@@ -56,11 +61,6 @@ public class GateBlock extends Block {
 
     /**
      * 向きと開閉状態に応じた当たり判定を設定
-     * @param state
-     * @param level
-     * @param pos
-     * @param context
-     * @return
      */
     @Override
     protected VoxelShape getCollisionShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
@@ -73,4 +73,25 @@ public class GateBlock extends Block {
         if (direction == Direction.WEST) return COLLISION_SHAPE_WEST;
         return COLLISION_SHAPE_NORTH;
     }
-}
+
+        /**
+         * アイテムを持って右クリックされた時の処理
+         */
+        @Override
+        protected ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hitResult) {
+            PolygonTrainMod.LOGGER.info("useItemOn");
+            if (PolygonTrainModItems.isValidTicket(stack)) { // isValidTicket()は未実装 常にtrue
+                PolygonTrainMod.LOGGER.info("isValidTicket");
+                openDoor(level, pos, state);
+                return ItemInteractionResult.sidedSuccess(level.isClientSide); // 操作が成功してパイプラインを終了させる
+            }
+            PolygonTrainMod.LOGGER.info("not valid Ticket");
+            return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION; // アイテムを持っていない状態での右クリック（`BlockBehaviour#useWithoutItem`）が次に実行される
+        }
+    
+        public void openDoor(Level level, BlockPos pos, BlockState state) {
+            PolygonTrainMod.LOGGER.info("openDoor");
+            BlockState newState = state.setValue(OPEN, true); // BlockState#setValue()は現在の値を更新しないので新しくBlockStateを作る必要がある
+            level.setBlock(pos, newState, Block.UPDATE_CLIENTS | Block.UPDATE_IMMEDIATE);
+        }
+    }
