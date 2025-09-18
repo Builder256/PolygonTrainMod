@@ -52,6 +52,7 @@ runs {
 
     client {
         // Comma-separated list of namespaces to load gametests from. Empty = all namespaces.
+//        jvmArg "-XX:+AllowEnhancedClassRedefinition"
         systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
     }
 
