@@ -1,6 +1,5 @@
 package com.portofino.polygondtrainmod.block;
 
-import com.portofino.polygondtrainmod.PolygonTrainMod;
 import com.portofino.polygondtrainmod.PolygonTrainModItems;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
