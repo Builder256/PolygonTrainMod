@@ -33,11 +33,20 @@ public class GateBlock extends Block {
         registerDefaultState(stateDefinition.any().setValue(FACING, Direction.NORTH).setValue(OPEN, false));
     }
 
+    /**
+     * BlockStateを追加
+     * @param pBuilder
+     */
     @Override
     protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> pBuilder) {
         pBuilder.add(FACING, OPEN);
     }
 
+    /**
+     * 設置時のプレイヤーの視点の向きに応じて設置の向きを設定
+     * @param pContext
+     * @return
+     */
     @Override
     @Nullable
     public BlockState getStateForPlacement(BlockPlaceContext pContext) {
@@ -45,6 +54,14 @@ public class GateBlock extends Block {
         return this.defaultBlockState().setValue(FACING, direction);
     }
 
+    /**
+     * 向きと開閉状態に応じた当たり判定を設定
+     * @param state
+     * @param level
+     * @param pos
+     * @param context
+     * @return
+     */
     @Override
     protected VoxelShape getCollisionShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
         Direction direction = state.getValue(FACING);
