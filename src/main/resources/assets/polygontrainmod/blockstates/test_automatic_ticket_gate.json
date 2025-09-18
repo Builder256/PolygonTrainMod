@@ -1,7 +1,42 @@
 {
   "variants": {
-    "": {
-      "model": "polygontrainmod:block/test_automatic_ticket_gate"
+    "facing=north,open=false": {
+      "model": "polygontrainmod:block/test_automatic_ticket_gate_close",
+      "uvlock": true
+    },
+    "facing=east,open=false": {
+      "model": "polygontrainmod:block/test_automatic_ticket_gate_close",
+      "y": 90,
+      "uvlock": true
+    },
+    "facing=south,open=false": {
+      "model": "polygontrainmod:block/test_automatic_ticket_gate_close",
+      "y": 180,
+      "uvlock": true
+    },
+    "facing=west,open=false": {
+      "model": "polygontrainmod:block/test_automatic_ticket_gate_close",
+      "y": 270,
+      "uvlock": true
+    },
+    "facing=north,open=true": {
+      "model": "polygontrainmod:block/test_automatic_ticket_gate_open",
+      "uvlock": true
+    },
+    "facing=east,open=true": {
+      "model": "polygontrainmod:block/test_automatic_ticket_gate_open",
+      "y": 90,
+      "uvlock": true
+    },
+    "facing=south,open=true": {
+      "model": "polygontrainmod:block/test_automatic_ticket_gate_open",
+      "y": 180,
+      "uvlock": true
+    },
+    "facing=west,open=true": {
+      "model": "polygontrainmod:block/test_automatic_ticket_gateopene",
+      "y": 270,
+      "uvlock": true
     }
   }
 }
