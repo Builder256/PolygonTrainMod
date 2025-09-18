@@ -26,8 +26,8 @@
       }
     },
     {
-      "from": [3, 5, 10],
-      "to": [13, 10, 12],
+      "from": [3, 5, 4],
+      "to": [13, 10, 6],
       "faces": {
         "up": { "texture": "#texture" },
         "down": { "texture": "#texture" },
