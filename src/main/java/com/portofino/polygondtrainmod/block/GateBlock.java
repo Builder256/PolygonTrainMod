@@ -15,7 +15,7 @@ import javax.annotation.Nullable;
 
 public class GateBlock extends Block {
     public static final BooleanProperty OPEN = BooleanProperty.create("open");
-    public static final DirectionProperty FACING = BlockStateProperties.FACING;
+    public static final DirectionProperty FACING = BlockStateProperties.HORIZONTAL_FACING;
 
     public GateBlock() {
         super(BlockBehaviour.Properties.of().sound(SoundType.STONE).noOcclusion());
