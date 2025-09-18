@@ -8,6 +8,11 @@ import net.neoforged.neoforge.registries.DeferredItem;
 import net.neoforged.neoforge.registries.DeferredRegister;
 
 public class PolygonTrainModItems {
+    /**
+     * 未実装 有効な切符かどうか判定する
+     * @param item 有効な切符の可能性があるItemStack
+     * @return 常にtrue
+     */
     public static boolean isValidTicket(ItemStack item) {
         return true; // 処理をまだ書いてないので一旦何が来てもtrueにしとく
     }
