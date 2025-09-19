@@ -37,11 +37,11 @@ public class PolygonTrainMod {
     public static final DeferredHolder<CreativeModeTab, CreativeModeTab> EXAMPLE_TAB = CREATIVE_MODE_TABS.register("example_tab", () -> CreativeModeTab.builder()
             .title(Component.translatable("itemGroup.polygontrainmod")) //CreativeModeTabのタイトルの言語キー
             .withTabsBefore(CreativeModeTabs.COMBAT)
-            .icon(() -> PolygonTrainModItems.TEST_TICKET.get().getDefaultInstance())
+            .icon(() -> PolygonTrainModItems.TEST_TICKET_ITEM.get().getDefaultInstance())
             .displayItems((parameters, output) -> {
                 output.accept(PolygonTrainModItems.EXAMPLE_ITEM.get()); // サンプルアイテムをタブに追加します。独自のタブの場合は、イベントよりもこの方法が推奨されます。
 
-                output.accept(PolygonTrainModItems.TEST_TICKET.get());
+                output.accept(PolygonTrainModItems.TEST_TICKET_ITEM.get());
                 // インベントリに作成したブロックアイテムを追加する、ブロックを直接登録しても自動でブロックアイテムを探索してやってくれるらしい
                 output.accept(PolygonTrainModItems.TEST_AUTOMATIC_TICKET_GATE_ITEM.get());
             }).build());
