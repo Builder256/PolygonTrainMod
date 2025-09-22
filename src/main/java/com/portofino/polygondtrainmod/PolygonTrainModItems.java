@@ -4,19 +4,10 @@ import com.portofino.polygondtrainmod.item.TicketItem;
 import net.minecraft.world.food.FoodProperties;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
-import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.registries.DeferredItem;
 import net.neoforged.neoforge.registries.DeferredRegister;
 
 public class PolygonTrainModItems {
-    /**
-     * 未実装 有効な切符かどうか判定する
-     * @param item 有効な切符の可能性があるItemStack
-     * @return 常にtrue
-     */
-    public static boolean isValidTicket(ItemStack item) {
-        return true; // 処理をまだ書いてないので一旦何が来てもtrueにしとく
-    }
 
     // Polygontrainmod "名前空間に登録されるアイテムを保持するために、Deferred Registerを作成する。
     public static final DeferredRegister.Items ITEMS = DeferredRegister.createItems(PolygonTrainMod.MODID);

@@ -1,6 +1,6 @@
 package com.portofino.polygondtrainmod.block;
 
-import com.portofino.polygondtrainmod.PolygonTrainModItems;
+import com.portofino.polygondtrainmod.item.TicketItem;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
@@ -82,7 +82,7 @@ public class GateBlock extends Block {
     @Override
     protected ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hitResult) {
 //        PolygonTrainMod.LOGGER.info("useItemOn");
-        if (PolygonTrainModItems.isValidTicket(stack)) { // isValidTicket()は未実装 常にtrueが返ってくる
+        if (TicketItem.isValidTicket(stack)) { // isValidTicket()は未実装 常にtrueが返ってくる
 //            PolygonTrainMod.LOGGER.info("isValidTicket");
             openDoor(level, pos, state);
             level.scheduleTick(pos, this, AUTO_CLOSE_DELAY_TICK); // 指定したtick後にtick()が発火する ここで呼ぶべきかなぁ？

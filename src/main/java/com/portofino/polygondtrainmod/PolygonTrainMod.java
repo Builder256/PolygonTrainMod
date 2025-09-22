@@ -58,6 +58,8 @@ public class PolygonTrainMod {
         PolygonTrainModItems.ITEMS.register(modEventBus);
         // MODイベントバスにDeferred Registerを登録し、タブが登録されるようにする。
         CREATIVE_MODE_TABS.register(modEventBus);
+        // MODイベントバスに
+        PolygonTrainModComponents.REGISTRAR.register(modEventBus);
 
         // 興味のあるサーバーやその他のゲームイベントに登録する。
         // これは、*この*クラス（PolygonTrainMod）がイベントに直接反応することを望む場合にのみ必要であることに注意してください。
