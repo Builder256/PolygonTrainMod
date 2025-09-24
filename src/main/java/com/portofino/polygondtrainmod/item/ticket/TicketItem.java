@@ -15,6 +15,9 @@ import java.util.List;
 
 /**
  * 切符アイテムクラス
+ * 通常の乗車券: TicketItem
+ * 回数券: CouponTicketItem
+ * ICカード乗車券: ICCardTicketItem
  */
 public class TicketItem extends Item {
     public TicketItem(Properties properties) {

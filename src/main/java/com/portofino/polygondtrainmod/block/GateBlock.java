@@ -30,6 +30,9 @@ import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
 
+/**
+ * 改札機ブロッククラス
+ */
 public class GateBlock extends Block {
     // BlockState
     public static final BooleanProperty OPEN = BooleanProperty.create("open");
