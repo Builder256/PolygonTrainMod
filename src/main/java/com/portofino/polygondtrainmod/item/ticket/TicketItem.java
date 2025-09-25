@@ -5,6 +5,7 @@ import net.minecraft.network.chat.Component;
 //import net.minecraft.world.InteractionHand;
 //import net.minecraft.world.InteractionResultHolder;
 //import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
@@ -15,46 +16,21 @@ import java.util.List;
 
 /**
  * 切符アイテムクラス
- * 通常の乗車券: TicketItem
- * 回数券: CouponTicketItem
- * ICカード乗車券: ICCardTicketItem
+ * <ul>
+ *     <li>通常の乗車券: TicketItem</li>
+ *     <li>回数乗車券: CouponTicketItem</li>
+ *     <li>ICカード乗車券: ICCardTicketItem</li>
+ * </ul>
  */
 public class TicketItem extends Item {
-    public TicketItem(Properties properties) {
-        super(properties);
+    public TicketItem(Item.Properties properties) {
+        super(
+            properties
+                .stacksTo(1)
+                // デフォルトコンポーネントを設定
+                .component(PolygonTrainModComponents.IS_ENTERED_TICKET, false)
+        );
     }
-
-//    /**
-//     * [テスト用]アイテムを手に持って右クリックされた時の処理
-//     *
-//     * @param level    右クリックされたlevel
-//     * @param player   右クリックしたplayer
-//     * @param usedHand 右クリックに使用した手
-//     * @return パイプラインが成功かどうか
-//     */
-//    @Override
-//    @NotNull
-//    public InteractionResultHolder<ItemStack> use(
-//        @NotNull Level level,
-//        Player player,
-//        @NotNull InteractionHand usedHand
-//    ) {
-//        ItemStack stack = player.getItemInHand(usedHand);
-//
-//        Integer currentNumber = stack.get(PolygonTrainModComponents.EXAMPLE_NUMBER.get());
-//        if (currentNumber == null) {
-//            currentNumber = 0;
-//        }
-//        stack.set(PolygonTrainModComponents.EXAMPLE_NUMBER.get(), currentNumber + 1);
-//
-//        Boolean isTicketUsed = stack.get(PolygonTrainModComponents.IS_TICKET_USED.get());
-//        if (isTicketUsed == null) {
-//            isTicketUsed = false;
-//        }
-//        stack.set(PolygonTrainModComponents.IS_TICKET_USED.get(), !isTicketUsed);
-//
-//        return InteractionResultHolder.success(stack);
-//    }
 
     /**
      * ツールチップテキストを追加
@@ -89,7 +65,7 @@ public class TicketItem extends Item {
 
     /**
      * その切符で改札を通ることができるか
-     * 正直いらないが今後の発展性のために
+     * 正直いらないが将来的な拡張性のために
      *
      * @param stack 検証する切符
      * @return 通ることができるか
@@ -104,10 +80,29 @@ public class TicketItem extends Item {
         // 入場状態がなければ未入場で更新
         if (isEnteredTicket == null) isEnteredTicket = false;
 
+        // それはそうとtrueを返す
         return true;
     }
 
-    public boolean passGate(ItemStack stack) {
-        return true;
+    /**
+     * 改札を通るときの処理
+     *
+     * @param stack  切符
+     * @param player プレイヤー
+     */
+    public void passGate(ItemStack stack, Player player) {
+        Boolean isEnteredTicket = stack.get(PolygonTrainModComponents.IS_ENTERED_TICKET.get());
+        if (isEnteredTicket == null) isEnteredTicket = false;
+
+        // インベントリから切符を削除（最大スタック数: 1）
+        // 改札機に切符を挿入する動作を再現
+        stack.shrink(1);
+        if (!isEnteredTicket) {
+            // 切符を復活
+            stack.grow(1);
+            stack.set(PolygonTrainModComponents.IS_ENTERED_TICKET.get(), true);
+            // 改札機から切符が返却される動作を再現
+            player.getInventory().add(stack);
+        }
     }
 }

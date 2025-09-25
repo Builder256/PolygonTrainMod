@@ -2,7 +2,10 @@
   "itemGroup.polygontrainmod": "てすとmod",
   "block.polygontrainmod.example_block": "例 Block",
   "item.polygontrainmod.example_item": "例 Item",
-  "item.polygontrainmod.test_ticket": "テスト切符",
+  "block.polygontrainmod.test_automatic_ticket_gate": "テスト改札機",
+  "item.polygontrainmod.ticket": "乗車券",
+  "item.polygontrainmod.coupon_ticket": "回数乗車券",
+//  "item.polygontrainmod.ic_card_ticket": "乗車券",
 
   "polygontrainmod.configuration.title": "てすとmod Configs",
   "polygontrainmod.configuration.section.polygontrainmod.common.toml": "てすとmod Configs",

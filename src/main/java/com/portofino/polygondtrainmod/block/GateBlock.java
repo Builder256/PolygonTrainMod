@@ -1,6 +1,5 @@
 package com.portofino.polygondtrainmod.block;
 
-import com.portofino.polygondtrainmod.PolygonTrainModComponents;
 import com.portofino.polygondtrainmod.item.ticket.TicketItem;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -9,7 +8,6 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.ItemInteractionResult;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
@@ -133,7 +131,7 @@ public class GateBlock extends Block {
         // アイテムを持っていない状態での右クリック（`BlockBehaviour#useWithoutItem`）が次に実行される
         if (!isValidTicket(stack)) return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
 
-        updateTicket(stack);
+        updateTicket(stack, player);
         openDoor(level, pos, state);
         // ドアを閉じる処理を予約する
         level.scheduleTick(pos, this, AUTO_CLOSE_DELAY_TICK); // 指定したtick後にtick()が発火する ここで呼ぶべきかなぁ？
@@ -170,14 +168,15 @@ public class GateBlock extends Block {
         level.setBlock(pos, newState, Block.UPDATE_CLIENTS | Block.UPDATE_IMMEDIATE);
     }
 
-    private boolean isValidTicket(ItemStack itemStack) {
+    private boolean isValidTicket(ItemStack stack) {
         // 今後itemがTicketItemであることを保証
-        if (!(itemStack.getItem() instanceof TicketItem ticket)) return false;
-        return ticket.canPassGate(itemStack);
+        if (!(stack.getItem() instanceof TicketItem ticket)) return false;
+        return ticket.canPassGate(stack);
     }
 
-    private void updateTicket(ItemStack stack){
-        Item item = stack.getItem();
-        stack.set(PolygonTrainModComponents.IS_ENTERED_TICKET.get(), true);
+    // あ～、1つ気づいちゃった。これ、参照透過性がない！もうちょっと賢いやり方があるなぁ、そうに決まってる
+    private void updateTicket(ItemStack stack, Player player){
+        if(!(stack.getItem() instanceof  TicketItem ticket)) return;
+        ticket.passGate(stack, player);
     }
 }
