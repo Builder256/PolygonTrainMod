@@ -42,10 +42,15 @@ public class PolygonTrainMod {
             .displayItems((parameters, output) -> {
                 output.accept(PolygonTrainModItems.EXAMPLE_ITEM.get()); // サンプルアイテムをタブに追加します。独自のタブの場合は、イベントよりもこの方法が推奨されます。
 
-                // 通常の乗車券をインベントリに追加
+                // 通常の乗車券をクリエイティブタブに追加
                 output.accept(PolygonTrainModItems.TICKET.get());
-                // 回数乗車券をインベントリに追加
+                // 回数乗車券をクリエイティブタブに追加
                 output.accept(PolygonTrainModItems.COUPON_TICKET.get());
+                // ICカード乗車券をクリエイティブタブに追加
+                output.accept(PolygonTrainModItems.IC_CARD_TICKET.get());
+
+
+
                 // インベントリに作成したブロックアイテムを追加する、ブロックを直接登録しても自動でブロックアイテムを探索してやってくれるらしい
                 output.accept(PolygonTrainModItems.TEST_AUTOMATIC_TICKET_GATE_ITEM.get());
             }).build());

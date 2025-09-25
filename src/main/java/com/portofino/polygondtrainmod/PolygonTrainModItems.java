@@ -1,6 +1,7 @@
 package com.portofino.polygondtrainmod;
 
 import com.portofino.polygondtrainmod.item.ticket.CouponTicketItem;
+import com.portofino.polygondtrainmod.item.ticket.ICCardTicketItem;
 import com.portofino.polygondtrainmod.item.ticket.TicketItem;
 import net.minecraft.world.food.FoodProperties;
 import net.minecraft.world.item.BlockItem;
@@ -28,7 +29,8 @@ public class PolygonTrainModItems {
     public static final DeferredItem<CouponTicketItem> COUPON_TICKET
         = ITEMS.register("coupon_ticket", CouponTicketItem::new);
     // ICカード乗車券を登録
-    // まだないよ
+    public static final DeferredItem<ICCardTicketItem> IC_CARD_TICKET
+        = ITEMS.register("ic_card_ticket", ICCardTicketItem::new);
 
     // id "polygontrainmod:example_id"、栄養度1、彩度2の新しい食品を作成する。
     public static final DeferredItem<Item> EXAMPLE_ITEM
