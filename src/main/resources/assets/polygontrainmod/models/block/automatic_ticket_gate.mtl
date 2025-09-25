@@ -1,0 +1,9 @@
+# Created by Metasequoia
+
+newmtl mat1
+Ka 0.00000 0.49620 0.00240
+Kd 0.00000 0.66160 0.00320
+Ks 0.00000 0.00000 0.00000
+Ns 5.00000
+map_Kd #automatic_ticket_gate
+

@@ -1,44 +1,8 @@
 {
-  "parent": "minecraft:block/block",
-  "elements": [
-    {
-      "from": [0, 0, 0],
-      "to": [3, 16, 16],
-      "faces": {
-        "up": { "texture": "#texture" },
-        "down": { "texture": "#texture" },
-        "north": { "texture": "#texture" },
-        "south": { "texture": "#texture" },
-        "west": { "texture": "#texture" },
-        "east": { "texture": "#texture" }
-      }
-    },
-    {
-      "from": [13, 0, 0],
-      "to": [16, 16, 16],
-      "faces": {
-        "up": { "texture": "#texture" },
-        "down": { "texture": "#texture" },
-        "north": { "texture": "#texture" },
-        "south": { "texture": "#texture" },
-        "west": { "texture": "#texture" },
-        "east": { "texture": "#texture" }
-      }
-    },
-    {
-      "from": [3, 5, 4],
-      "to": [13, 10, 6],
-      "faces": {
-        "up": { "texture": "#texture" },
-        "down": { "texture": "#texture" },
-        "north": { "texture": "#texture" },
-        "south": { "texture": "#texture" },
-        "west": { "texture": "#texture" },
-        "east": { "texture": "#texture" }
-      }
-    }
-  ],
+  "loader": "neoforge:obj",
+  "model": "polygontrainmod:models/block/automatic_ticket_gate.obj",
   "textures": {
-    "texture": "polygontrainmod:block/test_block"
-  }
+    "automatic_ticket_gate": "polygontrainmod:block/automatic_ticket_gate"
+  },
+  "emissive_ambient": false
 }
