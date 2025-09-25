@@ -58,10 +58,6 @@ public final class CouponTicketItem extends TicketItem {
         // 改札機に切符を挿入する動作を再現
         stack.shrink(1);
 
-        // インベントリから切符を削除（最大スタック数: 1）
-        // 改札機に切符を挿入する動作を再現
-        stack.shrink(1);
-
         if (!isEnteredTicket) {
             // 入場
             if (remaining_uses > 0) {
