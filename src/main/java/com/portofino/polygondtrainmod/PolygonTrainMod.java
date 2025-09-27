@@ -34,7 +34,7 @@ public class PolygonTrainMod {
     /* ~~~~~~~~~~ 以下DeferredHolderへの登録 ~~~~~~~~~~ */
 
     // 戦闘タブの後に配置される、idが"polygontrainmod:example_tab"のクリエイティブタブを登録
-    public static final DeferredHolder<CreativeModeTab, CreativeModeTab> EXAMPLE_TAB = CREATIVE_MODE_TABS.register("example_tab", () -> CreativeModeTab.builder()
+    public static final DeferredHolder<CreativeModeTab, CreativeModeTab> MAIN_TAB = CREATIVE_MODE_TABS.register("main_tab", () -> CreativeModeTab.builder()
         .title(Component.translatable("itemGroup.polygontrainmod")) //CreativeModeTabのタイトルの言語キー
         .withTabsBefore(CreativeModeTabs.COMBAT)
         // タブのアイコンを切符アイテムに設定
