@@ -1,0 +1,44 @@
+{
+  "multipart": [
+    {
+      "apply": {
+        "model": "polygontrainmod:block/overhead_line_pole"
+      }
+    },
+    {
+      "when": {
+        "north": true
+      },
+      "apply": {
+        "model": "polygontrainmod:block/overhead_line_beam",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "east": true
+      },
+      "apply": {
+        "model": "polygontrainmod:block/overhead_line_beam"
+      }
+    },
+    {
+      "when": {
+        "south": true
+      },
+      "apply": {
+        "model": "polygontrainmod:block/overhead_line_beam",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "west": true
+      },
+      "apply": {
+        "model": "polygontrainmod:block/overhead_line_beam",
+        "y": 180
+      }
+    }
+  ]
+}

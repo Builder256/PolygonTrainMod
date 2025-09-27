@@ -1,6 +1,9 @@
 package com.portofino.polygondtrainmod;
 
 import com.portofino.polygondtrainmod.block.GateBlock;
+import com.portofino.polygondtrainmod.block.OverheadLinePoleBlock;
+import net.minecraft.world.level.block.SoundType;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.neoforged.neoforge.registries.DeferredBlock;
 import net.neoforged.neoforge.registries.DeferredRegister;
 
@@ -10,4 +13,9 @@ public class PolygonTrainModBlocks {
     // テスト改札機を登録
     public static final DeferredBlock<GateBlock> TEST_AUTOMATIC_TICKET_GATE
         = BLOCKS.register("test_automatic_ticket_gate", GateBlock::new);
+    public static final DeferredBlock<OverheadLinePoleBlock> OVERHEAD_LINE_POLE
+        = BLOCKS.registerBlock(
+        "overhead_line_pole",
+        OverheadLinePoleBlock::new,
+        BlockBehaviour.Properties.of().sound(SoundType.METAL).noOcclusion());
 }

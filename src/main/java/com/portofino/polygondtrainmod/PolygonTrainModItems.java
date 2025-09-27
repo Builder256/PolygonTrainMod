@@ -16,10 +16,11 @@ public class PolygonTrainModItems {
 
     // テスト改札機のブロックアイテムを登録
     // インベントリに追加するにはブロックアイテムがないといけない
-    public static final DeferredItem<BlockItem> TEST_AUTOMATIC_TICKET_GATE_ITEM
-        = ITEMS.registerSimpleBlockItem(
-        "test_automatic_ticket_gate",
-        PolygonTrainModBlocks.TEST_AUTOMATIC_TICKET_GATE
+    public static final DeferredItem<BlockItem> TEST_AUTOMATIC_TICKET_GATE_ITEM = ITEMS.registerSimpleBlockItem(
+        "test_automatic_ticket_gate", PolygonTrainModBlocks.TEST_AUTOMATIC_TICKET_GATE
+    );
+    public static final DeferredItem<BlockItem> OVERHEAD_LINE_POLE_ITEM = ITEMS.registerSimpleBlockItem(
+        "overhead_line_pole", PolygonTrainModBlocks.OVERHEAD_LINE_POLE
     );
 
     // 通常の乗車券を登録

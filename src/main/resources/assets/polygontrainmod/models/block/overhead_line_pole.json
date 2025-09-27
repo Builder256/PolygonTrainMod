@@ -1,0 +1,8 @@
+{
+  "loader": "neoforge:obj",
+  "model": "polygontrainmod:models/block/overhead_line_pole.obj",
+  "textures": {
+    "mat1": "polygontrainmod:block/test_block"
+  },
+  "emissive_ambient": false
+}

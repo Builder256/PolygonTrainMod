@@ -35,25 +35,24 @@ public class PolygonTrainMod {
 
     // 戦闘タブの後に配置される、idが"polygontrainmod:example_tab"のクリエイティブタブを登録
     public static final DeferredHolder<CreativeModeTab, CreativeModeTab> EXAMPLE_TAB = CREATIVE_MODE_TABS.register("example_tab", () -> CreativeModeTab.builder()
-            .title(Component.translatable("itemGroup.polygontrainmod")) //CreativeModeTabのタイトルの言語キー
-            .withTabsBefore(CreativeModeTabs.COMBAT)
-            // タブのアイコンを切符アイテムに設定
-            .icon(() -> PolygonTrainModItems.TICKET.get().getDefaultInstance())
-            .displayItems((parameters, output) -> {
-                output.accept(PolygonTrainModItems.EXAMPLE_ITEM.get()); // サンプルアイテムをタブに追加します。独自のタブの場合は、イベントよりもこの方法が推奨されます。
+        .title(Component.translatable("itemGroup.polygontrainmod")) //CreativeModeTabのタイトルの言語キー
+        .withTabsBefore(CreativeModeTabs.COMBAT)
+        // タブのアイコンを切符アイテムに設定
+        .icon(() -> PolygonTrainModItems.TICKET.get().getDefaultInstance())
+        .displayItems((parameters, output) -> {
+            output.accept(PolygonTrainModItems.EXAMPLE_ITEM.get()); // サンプルアイテムをタブに追加します。独自のタブの場合は、イベントよりもこの方法が推奨されます。
 
-                // 通常の乗車券をクリエイティブタブに追加
-                output.accept(PolygonTrainModItems.TICKET.get());
-                // 回数乗車券をクリエイティブタブに追加
-                output.accept(PolygonTrainModItems.COUPON_TICKET.get());
-                // ICカード乗車券をクリエイティブタブに追加
-                output.accept(PolygonTrainModItems.IC_CARD_TICKET.get());
+            // 通常の乗車券をクリエイティブタブに追加
+            output.accept(PolygonTrainModItems.TICKET.get());
+            // 回数乗車券をクリエイティブタブに追加
+            output.accept(PolygonTrainModItems.COUPON_TICKET.get());
+            // ICカード乗車券をクリエイティブタブに追加
+            output.accept(PolygonTrainModItems.IC_CARD_TICKET.get());
 
-
-
-                // インベントリに作成したブロックアイテムを追加する、ブロックを直接登録しても自動でブロックアイテムを探索してやってくれるらしい
-                output.accept(PolygonTrainModItems.TEST_AUTOMATIC_TICKET_GATE_ITEM.get());
-            }).build());
+            // インベントリに作成したブロックアイテムを追加する、ブロックを直接登録しても自動でブロックアイテムを探索してやってくれるらしい
+            output.accept(PolygonTrainModItems.TEST_AUTOMATIC_TICKET_GATE_ITEM.get());
+            output.accept(PolygonTrainModItems.OVERHEAD_LINE_POLE_ITEM.get());
+        }).build());
 
     // MODクラスのコンストラクタは、MODがロードされたときに最初に実行されるコードです。
     // FML は IEventBus や ModContainer のようないくつかのパラメータタイプを認識し、 自動的に渡してくれます。
@@ -105,7 +104,7 @@ public class PolygonTrainMod {
     // SubscribeEvent を使用し、イベントバスに呼び出すメソッドを発見させることができます
 //    @SubscribeEvent
 //    public void onServerStarting(ServerStartingEvent event) {
-        // サーバー起動時に何かする
+    // サーバー起動時に何かする
 //        LOGGER.info("HELLO from server starting");
 //    }
 }
