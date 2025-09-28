@@ -2,6 +2,7 @@ package com.portofino.polygondtrainmod.item.ticket;
 
 import com.portofino.polygondtrainmod.PolygonTrainModComponents;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -36,13 +37,12 @@ public final class CouponTicketItem extends TicketItem {
 
         // if(isEnteredTicket)じゃダメなのは一体何故
         if (Boolean.TRUE.equals(isEnteredTicket)) {
-            // ハードコート良くないね。
-            tooltipComponents.add(Component.literal("入場済"));
+            tooltipComponents.add(Component.translatable("tooltip.polygontrainmod.ticket.entered"));
         }
 
         if (remaining_uses != null) {
-            String text = "残り使用回数: " + remaining_uses + "回";
-            tooltipComponents.add(Component.literal(text));
+            MutableComponent translatableText = Component.translatable("tooltip.polygontrainmod.ticket.used_count", remaining_uses);
+            tooltipComponents.add(translatableText);
         }
     }
 

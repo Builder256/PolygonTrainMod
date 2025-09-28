@@ -2,6 +2,14 @@
   "itemGroup.polygontrainmod": "PolygonTrainMod",
   "block.polygontrainmod.example_block": "Example Block",
   "item.polygontrainmod.example_item": "Example Item",
+  "block.polygontrainmod.test_automatic_ticket_gate": "Test ticket gate",
+  "block.polygontrainmod.overhead_line_pole": "Overhead line pole",
+  "item.polygontrainmod.ticket": "Ticket",
+  "item.polygontrainmod.coupon_ticket": "Coupon ticket",
+  "item.polygontrainmod.ic_card_ticket": "IC card ticket",
+
+  "tooltip.polygontrainmod.ticket.entered": "nyujozumi",
+  "tooltip.polygontrainmod.ticket.used_count": "nokori shiyou kaisu: %s kai",
 
   "polygontrainmod.configuration.title": "PolygonTrainMod Configs",
   "polygontrainmod.configuration.section.polygontrainmod.common.toml": "PolygonTrainMod Configs",

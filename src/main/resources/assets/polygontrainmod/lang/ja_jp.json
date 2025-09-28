@@ -1,15 +1,21 @@
 {
-  "itemGroup.polygontrainmod": "てすとmod",
-  "block.polygontrainmod.example_block": "例 Block",
-  "item.polygontrainmod.example_item": "例 Item",
+  "itemGroup.polygontrainmod": "PolygonTrainMod",
+
+  "block.polygontrainmod.example_block": "例ブロック",
+  "item.polygontrainmod.example_item": "例アイテム",
+
   "block.polygontrainmod.test_automatic_ticket_gate": "テスト改札機",
+  "block.polygontrainmod.overhead_line_pole": "架線柱",
   "item.polygontrainmod.ticket": "乗車券",
   "item.polygontrainmod.coupon_ticket": "回数乗車券",
   "item.polygontrainmod.ic_card_ticket": "ICカード乗車券",
 
-  "polygontrainmod.configuration.title": "てすとmod Configs",
-  "polygontrainmod.configuration.section.polygontrainmod.common.toml": "てすとmod Configs",
-  "polygontrainmod.configuration.section.polygontrainmod.common.toml.title": "てすとmod Configs",
+  "tooltip.polygontrainmod.ticket.entered": "入場済",
+  "tooltip.polygontrainmod.ticket.used_count": "残り使用回数: %s 回",
+
+  "polygontrainmod.configuration.title": "PolygonTrainModコンフィグ",
+  "polygontrainmod.configuration.section.polygontrainmod.common.toml": "PolygonTrainMod Configs",
+  "polygontrainmod.configuration.section.polygontrainmod.common.toml.title": "PolygonTrainMod Configs",
   "polygontrainmod.configuration.items": "Item List",
   "polygontrainmod.configuration.logDirtBlock": "Log Dirt Block",
   "polygontrainmod.configuration.magicNumberIntroduction": "Magic Number Text",
