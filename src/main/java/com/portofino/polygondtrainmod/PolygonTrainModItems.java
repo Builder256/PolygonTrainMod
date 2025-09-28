@@ -14,7 +14,7 @@ public class PolygonTrainModItems {
     // Polygontrainmod "名前空間に登録されるアイテムを保持するために、Deferred Registerを作成する。
     public static final DeferredRegister.Items ITEMS = DeferredRegister.createItems(PolygonTrainMod.MODID);
 
-    // テスト改札機のブロックアイテムを登録
+    // ブロックのブロックアイテムを登録
     // インベントリに追加するにはブロックアイテムがないといけない
     public static final DeferredItem<BlockItem> TEST_AUTOMATIC_TICKET_GATE_ITEM = ITEMS.registerSimpleBlockItem(
         "test_automatic_ticket_gate", PolygonTrainModBlocks.TEST_AUTOMATIC_TICKET_GATE
