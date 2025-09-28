@@ -1,0 +1,20 @@
+package com.portofino.polygondtrainmod.registry;
+
+import com.portofino.polygondtrainmod.PolygonTrainMod;
+import com.portofino.polygondtrainmod.entity.CarEntity;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.MobCategory;
+import net.neoforged.neoforge.registries.DeferredRegister;
+
+import java.util.function.Supplier;
+
+public class PolygonTrainModEntities {
+    public static final DeferredRegister<EntityType<?>> ENTITY_TYPES
+        = DeferredRegister.create(BuiltInRegistries.ENTITY_TYPE, PolygonTrainMod.MODID);
+
+    public static final Supplier<EntityType<CarEntity>> CAR = ENTITY_TYPES.register(
+        "car",
+        () -> EntityType.Builder.<CarEntity>of(CarEntity::new, MobCategory.MISC).build("car")
+    );
+}

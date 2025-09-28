@@ -1,5 +1,8 @@
 package com.portofino.polygondtrainmod;
 
+import com.portofino.polygondtrainmod.client.renderer.PolygonTrainModRenderers;
+import com.portofino.polygondtrainmod.registry.PolygonTrainModEntities;
+import net.neoforged.api.distmarker.Dist;
 import org.slf4j.Logger;
 
 import com.mojang.logging.LogUtils;
@@ -56,9 +59,13 @@ public class PolygonTrainMod {
 
     // MODクラスのコンストラクタは、MODがロードされたときに最初に実行されるコードです。
     // FML は IEventBus や ModContainer のようないくつかのパラメータタイプを認識し、 自動的に渡してくれます。
-    public PolygonTrainMod(IEventBus modEventBus, ModContainer modContainer) {
+    public PolygonTrainMod(IEventBus modEventBus, ModContainer modContainer, Dist dist) {
         // modloading用のcommonSetupメソッドを登録する。
         modEventBus.addListener(this::commonSetup);
+
+        if (dist == Dist.CLIENT) {
+            modEventBus.addListener(PolygonTrainModRenderers::registerEntityRenderers);
+        }
 
         // DeferredレジスタをMODイベントバスに登録し、ブロックが登録されるようにする
         PolygonTrainModBlocks.BLOCKS.register(modEventBus);
@@ -68,6 +75,7 @@ public class PolygonTrainMod {
         CREATIVE_MODE_TABS.register(modEventBus);
         // MODイベントバスに
         PolygonTrainModComponents.REGISTRAR.register(modEventBus);
+        PolygonTrainModEntities.ENTITY_TYPES.register(modEventBus);
 
         // 興味のあるサーバーやその他のゲームイベントに登録する。
         // これは、*この*クラス（PolygonTrainMod）がイベントに直接反応することを望む場合にのみ必要であることに注意してください。
