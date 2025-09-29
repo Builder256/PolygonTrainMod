@@ -1,7 +1,7 @@
-package com.portofino.polygondtrainmod;
+package com.portofino.polygontrainmod;
 
-import com.portofino.polygondtrainmod.block.GateBlock;
-import com.portofino.polygondtrainmod.block.OverheadLinePoleBlock;
+import com.portofino.polygontrainmod.block.GateBlock;
+import com.portofino.polygontrainmod.block.OverheadLinePoleBlock;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.neoforged.neoforge.registries.DeferredBlock;

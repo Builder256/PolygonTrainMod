@@ -1,6 +1,6 @@
-package com.portofino.polygondtrainmod.item.ticket;
+package com.portofino.polygontrainmod.item.ticket;
 
-import com.portofino.polygondtrainmod.PolygonTrainModComponents;
+import com.portofino.polygontrainmod.PolygonTrainModComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;

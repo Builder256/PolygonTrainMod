@@ -1,4 +1,4 @@
-package com.portofino.polygondtrainmod;
+package com.portofino.polygontrainmod;
 
 import net.minecraft.client.Minecraft;
 import net.neoforged.api.distmarker.Dist;

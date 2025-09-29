@@ -1,7 +1,7 @@
-package com.portofino.polygondtrainmod.registry;
+package com.portofino.polygontrainmod.registry;
 
-import com.portofino.polygondtrainmod.PolygonTrainMod;
-import com.portofino.polygondtrainmod.entity.CarEntity;
+import com.portofino.polygontrainmod.PolygonTrainMod;
+import com.portofino.polygontrainmod.entity.CarEntity;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;

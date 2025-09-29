@@ -1,4 +1,4 @@
-package com.portofino.polygondtrainmod.entity;
+package com.portofino.polygontrainmod.entity;
 
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;

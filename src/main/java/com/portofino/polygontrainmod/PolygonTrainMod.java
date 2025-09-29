@@ -1,7 +1,7 @@
-package com.portofino.polygondtrainmod;
+package com.portofino.polygontrainmod;
 
-import com.portofino.polygondtrainmod.client.renderer.PolygonTrainModRenderers;
-import com.portofino.polygondtrainmod.registry.PolygonTrainModEntities;
+import com.portofino.polygontrainmod.client.renderer.PolygonTrainModRenderers;
+import com.portofino.polygontrainmod.registry.PolygonTrainModEntities;
 import net.neoforged.api.distmarker.Dist;
 import org.slf4j.Logger;
 

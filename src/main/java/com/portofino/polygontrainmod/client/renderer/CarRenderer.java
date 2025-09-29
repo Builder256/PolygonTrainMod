@@ -1,8 +1,8 @@
-package com.portofino.polygondtrainmod.client.renderer;
+package com.portofino.polygontrainmod.client.renderer;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.portofino.polygondtrainmod.PolygonTrainMod;
-import com.portofino.polygondtrainmod.entity.CarEntity;
+import com.portofino.polygontrainmod.PolygonTrainMod;
+import com.portofino.polygontrainmod.entity.CarEntity;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;

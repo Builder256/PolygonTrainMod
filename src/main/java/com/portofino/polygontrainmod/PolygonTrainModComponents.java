@@ -1,4 +1,4 @@
-package com.portofino.polygondtrainmod;
+package com.portofino.polygontrainmod;
 
 import com.mojang.serialization.Codec;
 import net.minecraft.core.component.DataComponentType;

@@ -1,6 +1,6 @@
-package com.portofino.polygondtrainmod.client.renderer;
+package com.portofino.polygontrainmod.client.renderer;
 
-import com.portofino.polygondtrainmod.registry.PolygonTrainModEntities;
+import com.portofino.polygontrainmod.registry.PolygonTrainModEntities;
 import net.neoforged.neoforge.client.event.EntityRenderersEvent;
 
 public class PolygonTrainModRenderers {

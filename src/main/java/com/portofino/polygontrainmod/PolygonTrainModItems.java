@@ -1,8 +1,8 @@
-package com.portofino.polygondtrainmod;
+package com.portofino.polygontrainmod;
 
-import com.portofino.polygondtrainmod.item.ticket.CouponTicketItem;
-import com.portofino.polygondtrainmod.item.ticket.ICCardTicketItem;
-import com.portofino.polygondtrainmod.item.ticket.TicketItem;
+import com.portofino.polygontrainmod.item.ticket.CouponTicketItem;
+import com.portofino.polygontrainmod.item.ticket.ICCardTicketItem;
+import com.portofino.polygontrainmod.item.ticket.TicketItem;
 import net.minecraft.world.food.FoodProperties;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;

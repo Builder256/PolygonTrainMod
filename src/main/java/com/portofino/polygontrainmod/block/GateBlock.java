@@ -1,6 +1,6 @@
-package com.portofino.polygondtrainmod.block;
+package com.portofino.polygontrainmod.block;
 
-import com.portofino.polygondtrainmod.item.ticket.TicketItem;
+import com.portofino.polygontrainmod.item.ticket.TicketItem;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
