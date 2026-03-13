@@ -127,9 +127,9 @@ public class CarEntity extends Entity {
         return true;
     }
 
-
     @Override
-    public Packet<ClientGamePacketListener> getAddEntityPacket(ServerEntity entity) {
+    @NotNull
+    public Packet<ClientGamePacketListener> getAddEntityPacket(@NotNull ServerEntity entity) {
         return new ClientboundAddEntityPacket(this, entity);
     }
 
