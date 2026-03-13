@@ -86,7 +86,7 @@ public class CarEntity extends Entity {
     }
 
     /**
-     * よくわからん。
+     * よくわからん
      *
      * @param passenger
      * @param dimensions
@@ -108,7 +108,7 @@ public class CarEntity extends Entity {
     }
 
     /**
-     * 体当たりをして押せるかどうかだと思われる。
+     * 体当たりをして押せるかどうかだと思われる
      *
      * @return 常に偽 自動車だし押せなくていいよね
      */
