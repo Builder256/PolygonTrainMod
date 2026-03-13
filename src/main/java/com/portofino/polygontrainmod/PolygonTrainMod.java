@@ -44,6 +44,7 @@ public class PolygonTrainMod {
     // そのため、実際のオブジェクトの代わりにコードで使用されるためにつくられたのが、DeferredHolderだと思う
 
     // クリエイティブタブ"polygontrainmod:main_tab"を登録
+    @SuppressWarnings("unused")
     public static final DeferredHolder<CreativeModeTab, CreativeModeTab> MAIN_TAB = CREATIVE_MODE_TABS.register("main_tab", () -> CreativeModeTab.builder()
         .title(Component.translatable("itemGroup.polygontrainmod")) //CreativeModeTabのタイトルの言語キー
         .withTabsBefore(CreativeModeTabs.COMBAT)
