@@ -164,9 +164,17 @@ public class CarEntity extends Entity {
             Entity driver = this.getControllingPassenger();
             if (driver instanceof Player player) handlePlayerInput(player);
 
-//            this.setDeltaMovement(1.0F, this.getDeltaMovement().y, this.getDeltaMovement().z);
-            this.move(MoverType.SELF, this.getDeltaMovement());
-        }
+
+        // Entity#isControlledByLocalInstance は、自身が乗っている場合はlocal、そうでなければserverでtrue
+        // Entityの移動操作に使うとよいっぽい
+        if (!this.isControlledByLocalInstance()) return;
+
+        Entity driver = this.getControllingPassenger();
+        if (driver instanceof Player player) handlePlayerInput(player);
+
+        // 実際に移動させる
+        this.move(MoverType.SELF, this.getDeltaMovement());
+    }
 
     }
 
@@ -243,14 +251,14 @@ public class CarEntity extends Entity {
 
 
     private void handlePlayerInput(Player player) {
-        // 前後進の係数
+        // 前後進
         float forward = 0.0f;
-        // Wキーが押されると0.98, Sキーが押されると-0.98, 両方は知らん
+        // 前進0.98, 後進-0.98
         float W_S = player.zza;
-        // Aキーが押されると0.98, Dキーが押されると-0.98, 両方は知らん
+        // 左0.98, 右-0.98
         float A_D = player.xxa;
 
-        PolygonTrainMod.LOGGER.info(String.valueOf(W_S) + ',' + A_D);
+//        PolygonTrainMod.LOGGER.info(String.valueOf(W_S) + ',' + A_D);
         // 前進
         if (W_S > 0) forward = 1.0f;
         // 後進
