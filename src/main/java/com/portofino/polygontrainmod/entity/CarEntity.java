@@ -145,24 +145,17 @@ public class CarEntity extends Entity {
 //        } else {
 //            this.clientTick();
 //        }
-
-
 //        if (this.isControlledByLocalInstance()) {
 //            this.updateInputs();
 //            this.moveVehicle();
-
 //            if (this.level().isClientSide()) {
 //                this.controlVehicle();
 //            }
 //        } else {
 //            this.setDeltaMovement(Vec3.ZERO);
 //        }
-
 //        this.checkInsideBlocks();
 
-        if (this.isControlledByLocalInstance()) {
-            Entity driver = this.getControllingPassenger();
-            if (driver instanceof Player player) handlePlayerInput(player);
 
 
         // Entity#isControlledByLocalInstance は、自身が乗っている場合はlocal、そうでなければserverでtrue
@@ -176,15 +169,10 @@ public class CarEntity extends Entity {
         this.move(MoverType.SELF, this.getDeltaMovement());
     }
 
-    }
-
     private void updateInputs() {
         Entity controller = this.getControllingPassenger();
         if (controller instanceof Player) {
-//            PolygonTrainMod.LOGGER.info("the controller is a Player!");
             this.momentum = 0.0F;
-        } else {
-//            PolygonTrainMod.LOGGER.info("the controller is not a Player!");
         }
     }
 
@@ -244,7 +232,6 @@ public class CarEntity extends Entity {
         this.setDeltaMovement(motionX, motionY, motionZ);
 
         if (this.isControlledByLocalInstance()) {
-//            PolygonTrainMod.LOGGER.info("call this.move!");
             this.move(MoverType.SELF, this.getDeltaMovement());
         }
     }
@@ -271,7 +258,8 @@ public class CarEntity extends Entity {
         if (A_D < 0) turn = -1.0f;
 
         // それはそうと適当に操作を反映
-        this.setDeltaMovement(-turn, this.getDeltaMovement().y, -forward);
+        this.setYRot(this.getYRot() + turn);
+        this.setDeltaMovement(this.getDeltaMovement().x, this.getDeltaMovement().y, -forward);
 
 //
 //        if (forward != 0) {
