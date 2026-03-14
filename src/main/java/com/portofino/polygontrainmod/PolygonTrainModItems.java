@@ -10,12 +10,12 @@ import net.neoforged.neoforge.registries.DeferredItem;
 import net.neoforged.neoforge.registries.DeferredRegister;
 
 public class PolygonTrainModItems {
-
-    // Polygontrainmod "名前空間に登録されるアイテムを保持するために、Deferred Registerを作成する。
+    // アイテムを保持するDeferredRegisterを作成し、すべてを名前空間"polygontrainmod"に登録する
     public static final DeferredRegister.Items ITEMS = DeferredRegister.createItems(PolygonTrainMod.MODID);
 
-    // ブロックのブロックアイテムを登録
-    // インベントリに追加するにはブロックアイテムがないといけない
+    // BlockのBlockItemを登録
+    // 1.7.10と違い、BlockItemを明示的に実装する必要がある
+    // 炎ブロックなど、インベントリに配置する必要のない一部のブロック以外はBlockItemの登録が必須
     public static final DeferredItem<BlockItem> TEST_AUTOMATIC_TICKET_GATE_ITEM = ITEMS.registerSimpleBlockItem(
         "test_automatic_ticket_gate", PolygonTrainModBlocks.TEST_AUTOMATIC_TICKET_GATE
     );
@@ -33,7 +33,7 @@ public class PolygonTrainModItems {
     public static final DeferredItem<ICCardTicketItem> IC_CARD_TICKET
         = ITEMS.register("ic_card_ticket", ICCardTicketItem::new);
 
-    // id "polygontrainmod:example_id"、栄養度1、彩度2の新しい食品を作成する。
+    // 栄養度1、彩度2の性質を持つ新しい食品EXAMPLE_ITEMを登録する
     public static final DeferredItem<Item> EXAMPLE_ITEM
         = ITEMS.registerSimpleItem("example_item", new Item.Properties().food(new FoodProperties.Builder()
         .alwaysEdible().nutrition(1).saturationModifier(2f).build()));
