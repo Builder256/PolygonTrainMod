@@ -60,7 +60,7 @@ public class PolygonTrainMod {
             output.accept(PolygonTrainModItems.COUPON_TICKET.get());
             // ICカード乗車券をクリエイティブタブに追加
             output.accept(PolygonTrainModItems.IC_CARD_TICKET.get());
-            // 各種BlockののBlockItemをクリエイティブタブ追加する
+            // 各種BlockのBlockItemをクリエイティブタブに追加する
             // 今回はItemを指定しているが、Blockを直接登録した場合も、自動で対応するBlockItemを探索してやってくれるらしい
             output.accept(PolygonTrainModItems.TEST_AUTOMATIC_TICKET_GATE_ITEM.get());
             output.accept(PolygonTrainModItems.OVERHEAD_LINE_POLE_ITEM.get());
@@ -79,7 +79,7 @@ public class PolygonTrainMod {
             modEventBus.addListener(PolygonTrainModRenderers::registerEntityRenderers);
         }
 
-        // DeferredRegisterをNeoForgeのMODEventButに登録し、DeferredRegisterに登録された各ブロックがゲームに登録されるようにする
+        // DeferredRegisterをNeoForgeのModEventBusに登録し、DeferredRegisterに登録された各ブロックがゲームに登録されるようにする
         PolygonTrainModBlocks.BLOCKS.register(modEventBus);
         PolygonTrainModItems.ITEMS.register(modEventBus);
         CREATIVE_MODE_TABS.register(modEventBus);
