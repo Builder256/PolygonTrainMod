@@ -8,8 +8,9 @@ import net.neoforged.neoforge.registries.DeferredBlock;
 import net.neoforged.neoforge.registries.DeferredRegister;
 
 public class PolygonTrainModBlocks {
-    // すべてのブロックを "polygontrainmod "名前空間に登録するために、Deferred Registerを作成する。
+    // ブロックを保持するDeferredRegisterを作成し、すべてを名前空間"polygontrainmod"に登録する
     public static final DeferredRegister.Blocks BLOCKS = DeferredRegister.createBlocks(PolygonTrainMod.MODID);
+
     // テスト改札機を登録
     public static final DeferredBlock<GateBlock> TEST_AUTOMATIC_TICKET_GATE
         = BLOCKS.register("test_automatic_ticket_gate", GateBlock::new);

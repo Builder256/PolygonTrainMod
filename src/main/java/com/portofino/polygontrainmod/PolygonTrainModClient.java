@@ -10,9 +10,10 @@ import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 import net.neoforged.neoforge.client.gui.ConfigurationScreen;
 import net.neoforged.neoforge.client.gui.IConfigScreenFactory;
 
-// このクラスは専用サーバーではロードされません。ここからクライアント側のコードにアクセスしても安全です。
+// Modアノテーションに、dist = Dist.CLIENTを指定しているため、このクラスはクライアントサイドにのみ存在するようになるらしい
 @Mod(value = PolygonTrainMod.MODID, dist = Dist.CLIENT)
-// EventBusSubscriber を使用すると、@SubscribeEvent でアノテーションされたクラス内のすべての静的メソッドを自動的に登録できます。
+// EventBusSubscriberを使用すると、@SubscribeEventアノテーションのあるこのクラス内のすべての静的メソッドが、
+// Modコンストラクタで登録せずとも自動的に登録されるらしい
 @EventBusSubscriber(modid = PolygonTrainMod.MODID, value = Dist.CLIENT)
 public class PolygonTrainModClient {
     public PolygonTrainModClient(ModContainer container) {
