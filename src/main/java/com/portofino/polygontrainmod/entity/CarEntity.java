@@ -240,21 +240,21 @@ public class CarEntity extends Entity {
         // 前後進
         float forward = 0.0f;
         // 前進0.98, 後進-0.98
-        float W_S = player.zza;
+        float wS = player.zza;
         // 左0.98, 右-0.98
-        float A_D = player.xxa;
+        float aD = player.xxa;
 
 //        PolygonTrainMod.LOGGER.info(String.valueOf(W_S) + ',' + A_D);
         // 前進
-        if (W_S > 0) forward = 1.0f;
+        if (wS > 0) forward = 1.0f;
         // 後進
-        if (W_S < 0) forward = -1.0f;
+        if (wS < 0) forward = -1.0f;
 
         float turn = 0.0f;
         // 左旋回
-        if (A_D > 0) turn = 1.0f;
+        if (aD > 0) turn = 1.0f;
         // 右旋回
-        if (A_D < 0) turn = -1.0f;
+        if (aD < 0) turn = -1.0f;
 
         // それはそうと適当に操作を反映
         this.setYRot(this.getYRot() + turn);
