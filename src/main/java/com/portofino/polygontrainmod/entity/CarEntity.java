@@ -16,10 +16,10 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
 
+ // Entityについて
+ // Entityは、BlockやItemと異なり、1つの実体に対して必ず1つのインスタンスを持つ。それによって、より多くの状態と処理を実装できる。
 /**
- * 自動車Entityクラス<br>
- * <strong>Entityについて</strong><br>
- * Entityは、BlockやItemと異なり、1つの実体に対して必ず1つのインスタンスを持つ。それによって、より多くの状態と処理を実装できる。
+ * 自動車Entityクラス
  */
 public class CarEntity extends Entity {
 //    private static final EntityDataAccessor<Float> DATA_SPEED =
@@ -74,10 +74,9 @@ public class CarEntity extends Entity {
     }
 
     /**
-     * 操縦している乗客<br>
-     * 本来は常にnullなので乗客がいた時にそれを返却するように更新
+     * 操縦しているLivingEntity
      *
-     * @return 乗客
+     * @return あればそのLivingEntity、なければnull
      */
     @Override
     public LivingEntity getControllingPassenger() {
@@ -118,7 +117,7 @@ public class CarEntity extends Entity {
     }
 
     /**
-     * クリック判定を発生させるかどうかのようだ
+     * クリック判定を発生させるかどうかだと思われる
      *
      * @return もちろん発生させる じゃないと乗れない
      */
