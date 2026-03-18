@@ -16,6 +16,7 @@ public class PolygonTrainModEntities {
     public static final Supplier<EntityType<CarEntity>> CAR = ENTITY_TYPES.register(
         "car",
         () -> EntityType.Builder.<CarEntity>of(CarEntity::new, MobCategory.MISC)
+            .sized(3.0f, 2.0f)
             .clientTrackingRange(10)
             .updateInterval(1)
             .build("car")

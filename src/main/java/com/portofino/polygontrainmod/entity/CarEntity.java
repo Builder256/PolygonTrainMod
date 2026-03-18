@@ -16,10 +16,10 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
 
+ // Entityについて
+ // Entityは、BlockやItemと異なり、1つの実体に対して必ず1つのインスタンスを持つ。それによって、より多くの状態と処理を実装できる。
 /**
- * 自動車Entityクラス<br>
- * <strong>Entityについて</strong><br>
- * Entityは、BlockやItemと異なり、1つの実体に対して必ず1つのインスタンスを持つ。それによって、より多くの状態と処理を実装できる。
+ * 自動車Entityクラス
  */
 public class CarEntity extends Entity {
 //    private static final EntityDataAccessor<Float> DATA_SPEED =
@@ -74,10 +74,9 @@ public class CarEntity extends Entity {
     }
 
     /**
-     * 操縦している乗客<br>
-     * 本来は常にnullなので乗客がいた時にそれを返却するように更新
+     * 操縦しているLivingEntity
      *
-     * @return 乗客
+     * @return あればそのLivingEntity、なければnull
      */
     @Override
     public LivingEntity getControllingPassenger() {
@@ -118,7 +117,7 @@ public class CarEntity extends Entity {
     }
 
     /**
-     * クリック判定を発生させるかどうかのようだ
+     * クリック判定を発生させるかどうかだと思われる
      *
      * @return もちろん発生させる じゃないと乗れない
      */
@@ -241,24 +240,25 @@ public class CarEntity extends Entity {
         // 前後進
         float forward = 0.0f;
         // 前進0.98, 後進-0.98
-        float W_S = player.zza;
+        float wS = player.zza;
         // 左0.98, 右-0.98
-        float A_D = player.xxa;
+        float aD = player.xxa;
 
 //        PolygonTrainMod.LOGGER.info(String.valueOf(W_S) + ',' + A_D);
         // 前進
-        if (W_S > 0) forward = 1.0f;
+        if (wS > 0) forward = 1.0f;
         // 後進
-        if (W_S < 0) forward = -1.0f;
+        if (wS < 0) forward = -1.0f;
 
         float turn = 0.0f;
         // 左旋回
-        if (A_D > 0) turn = 1.0f;
+        if (aD > 0) turn = 1.0f;
         // 右旋回
-        if (A_D < 0) turn = -1.0f;
+        if (aD < 0) turn = -1.0f;
 
         // それはそうと適当に操作を反映
-        this.setYRot(this.getYRot() + turn);
+        this.setYRot(this.getYRot() - turn);
+        // TODO: 旋回に対応
         this.setDeltaMovement(this.getDeltaMovement().x, this.getDeltaMovement().y, -forward);
 
 //
