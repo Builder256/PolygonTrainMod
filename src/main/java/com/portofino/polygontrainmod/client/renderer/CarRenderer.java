@@ -72,7 +72,8 @@ public class CarRenderer extends EntityRenderer<CarEntity> {
         buffer.addVertex(matrix, 1, 0, 0).setColor(255, 255, 255, 255).setUv(1, 1).setOverlay(OverlayTexture.NO_OVERLAY).setLight(light).setNormal(normalized[0], normalized[1], normalized[2]);
         buffer.addVertex(matrix, 1, 1, 0).setColor(255, 255, 255, 255).setUv(1, 1).setOverlay(OverlayTexture.NO_OVERLAY).setLight(light).setNormal(normalized[0], normalized[1], normalized[2]);
 
-        // 四角ポリゴン
+        // 両ポリゴンの重なる2頂点について、ナナメ45度の方向の法線ベクトルを追加して、簡易的なスムースシェーディング処理を行う
+
         // ポリゴン2
         buffer.addVertex(matrix, 1, 1, 0).setColor(255, 255, 255, 255).setUv(0, 0).setOverlay(OverlayTexture.NO_OVERLAY).setLight(light).setNormal(normalized[0], normalized[1], normalized[2]);
         buffer.addVertex(matrix, 1, 0, 0).setColor(255, 255, 255, 255).setUv(0, 1).setOverlay(OverlayTexture.NO_OVERLAY).setLight(light).setNormal(normalized[0], normalized[1], normalized[2]);
