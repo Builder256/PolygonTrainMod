@@ -3,8 +3,6 @@ package com.portofino.polygontrainmod.client.renderer;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.portofino.polygontrainmod.PolygonTrainMod;
-//import com.portofino.polygontrainmod.client.model.CarModel;
-//import com.portofino.polygontrainmod.client.model.PolygonTrainModEntityRendererLayers;
 import com.portofino.polygontrainmod.entity.CarEntity;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
@@ -20,12 +18,10 @@ import org.joml.Vector3f;
 
 @OnlyIn(Dist.CLIENT)
 public class CarRenderer extends EntityRenderer<CarEntity> {
-    // private final CarModel model;
     public static final ResourceLocation TEXTURE = ResourceLocation.fromNamespaceAndPath(PolygonTrainMod.MODID, "textures/white-1024px.png");
 
     public CarRenderer(EntityRendererProvider.Context context) {
         super(context);
-    //  this.model = new CarModel(context.bakeLayer(PolygonTrainModEntityRendererLayers.CAR_ENTITY));
     }
 
     @Override
@@ -37,15 +33,6 @@ public class CarRenderer extends EntityRenderer<CarEntity> {
     @Override
     public void render(@NotNull CarEntity entity, float entityYaw, float partialTick, PoseStack poseStack, MultiBufferSource bufferSource, int packedLight) {
         poseStack.pushPose();
-
-        // // 向き回転（EntityYawに合わせる）
-        // poseStack.mulPose(Axis.YP.rotationDegrees(
-        //     Mth.lerp(partialTick, entity.yRotO, entity.getYRot()) - 180f
-        // ));
-
-        // model.setupAnim(entity, 0, 0, entity.tickCount + partialTick, 0, 0);
-        // model.renderToBuffer(poseStack, consumer, packedLight,
-        //     OverlayTexture.NO_OVERLAY, -1);
 
         VertexConsumer buffer = bufferSource.getBuffer(RenderType.entityTranslucentCull(TEXTURE));
 
