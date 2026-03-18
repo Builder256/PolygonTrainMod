@@ -76,7 +76,7 @@ public class CarRenderer extends EntityRenderer<CarEntity> {
         // 四角ポリゴン
         buffer.addVertex(matrix, 1, 1, 0).setColor(255, 255, 255, 255).setUv(0, 0).setOverlay(OverlayTexture.NO_OVERLAY).setLight(light).setNormal(normalized[0], normalized[1], normalized[2]);
         buffer.addVertex(matrix, 1, 0, 0).setColor(255, 255, 255, 255).setUv(0, 1).setOverlay(OverlayTexture.NO_OVERLAY).setLight(light).setNormal(normalized[0], normalized[1], normalized[2]);
-        buffer.addVertex(matrix, 1, 0, -1).setColor(255, 255, 255, 255).setUv(1, 1).setOverlay(OverlayTexture.NO_OVERLAY).setLight(light).setNormal(1, 1, 0);
-        buffer.addVertex(matrix, 1, 1, -1).setColor(255, 255, 255, 255).setUv(1, 0).setOverlay(OverlayTexture.NO_OVERLAY).setLight(light).setNormal(1, 1, 0);
+        buffer.addVertex(matrix, 1, 0, -1).setColor(255, 255, 255, 255).setUv(1, 1).setOverlay(OverlayTexture.NO_OVERLAY).setLight(light).setNormal(1, 0, 0);
+        buffer.addVertex(matrix, 1, 1, -1).setColor(255, 255, 255, 255).setUv(1, 0).setOverlay(OverlayTexture.NO_OVERLAY).setLight(light).setNormal(1, 0, 0);
     }
 }
