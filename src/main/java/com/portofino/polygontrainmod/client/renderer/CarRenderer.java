@@ -66,14 +66,14 @@ public class CarRenderer extends EntityRenderer<CarEntity> {
         double norm = Math.sqrt(temp);
         float[] normalized = {(float) (vector[0]/norm), (float) (vector[1]/norm), (float) (vector[2]/norm)};
 
-        // 三角ポリゴン
+        // ポリゴン1
         buffer.addVertex(matrix, 0, 1, 0).setColor(255, 255, 255, 255).setUv(0, 0).setOverlay(OverlayTexture.NO_OVERLAY).setLight(light).setNormal(0, 0, 1);
         buffer.addVertex(matrix, 0, 0, 0).setColor(255, 255, 255, 255).setUv(0, 1).setOverlay(OverlayTexture.NO_OVERLAY).setLight(light).setNormal(0, 0, 1);
         buffer.addVertex(matrix, 1, 0, 0).setColor(255, 255, 255, 255).setUv(1, 1).setOverlay(OverlayTexture.NO_OVERLAY).setLight(light).setNormal(normalized[0], normalized[1], normalized[2]);
-        // 縮退させて三角形ポリゴンにする
         buffer.addVertex(matrix, 1, 1, 0).setColor(255, 255, 255, 255).setUv(1, 1).setOverlay(OverlayTexture.NO_OVERLAY).setLight(light).setNormal(normalized[0], normalized[1], normalized[2]);
 
         // 四角ポリゴン
+        // ポリゴン2
         buffer.addVertex(matrix, 1, 1, 0).setColor(255, 255, 255, 255).setUv(0, 0).setOverlay(OverlayTexture.NO_OVERLAY).setLight(light).setNormal(normalized[0], normalized[1], normalized[2]);
         buffer.addVertex(matrix, 1, 0, 0).setColor(255, 255, 255, 255).setUv(0, 1).setOverlay(OverlayTexture.NO_OVERLAY).setLight(light).setNormal(normalized[0], normalized[1], normalized[2]);
         buffer.addVertex(matrix, 1, 0, -1).setColor(255, 255, 255, 255).setUv(1, 1).setOverlay(OverlayTexture.NO_OVERLAY).setLight(light).setNormal(1, 0, 0);
