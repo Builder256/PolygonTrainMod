@@ -16,6 +16,7 @@ import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 import org.jetbrains.annotations.NotNull;
 import org.joml.Matrix4f;
+import org.joml.Vector3f;
 
 @OnlyIn(Dist.CLIENT)
 public class CarRenderer extends EntityRenderer<CarEntity> {
@@ -57,26 +58,23 @@ public class CarRenderer extends EntityRenderer<CarEntity> {
     }
 
     private void buildQuad(VertexConsumer buffer, Matrix4f matrix, int light) {
-        int[] vector = {1, 0, 1};
-        float temp = 0;
-        for (int j : vector) {
-            float doubled = j * j;
-            temp += doubled;
-        }
-        double norm = Math.sqrt(temp);
-        float[] normalized = {(float) (vector[0]/norm), (float) (vector[1]/norm), (float) (vector[2]/norm)};
+        Vector3f testNormalVector = new Vector3f(1, 0, 1).normalize();
+
+        float x = testNormalVector.x;
+        float y = testNormalVector.y;
+        float z = testNormalVector.z;
 
         // ポリゴン1
         buffer.addVertex(matrix, 0, 1, 0).setColor(255, 255, 255, 255).setUv(0, 0).setOverlay(OverlayTexture.NO_OVERLAY).setLight(light).setNormal(0, 0, 1);
         buffer.addVertex(matrix, 0, 0, 0).setColor(255, 255, 255, 255).setUv(0, 1).setOverlay(OverlayTexture.NO_OVERLAY).setLight(light).setNormal(0, 0, 1);
-        buffer.addVertex(matrix, 1, 0, 0).setColor(255, 255, 255, 255).setUv(1, 1).setOverlay(OverlayTexture.NO_OVERLAY).setLight(light).setNormal(normalized[0], normalized[1], normalized[2]);
-        buffer.addVertex(matrix, 1, 1, 0).setColor(255, 255, 255, 255).setUv(1, 1).setOverlay(OverlayTexture.NO_OVERLAY).setLight(light).setNormal(normalized[0], normalized[1], normalized[2]);
+        buffer.addVertex(matrix, 1, 0, 0).setColor(255, 255, 255, 255).setUv(1, 1).setOverlay(OverlayTexture.NO_OVERLAY).setLight(light).setNormal(x, y, z);
+        buffer.addVertex(matrix, 1, 1, 0).setColor(255, 255, 255, 255).setUv(1, 1).setOverlay(OverlayTexture.NO_OVERLAY).setLight(light).setNormal(x, y, z);
 
         // 両ポリゴンの重なる2頂点について、ナナメ45度の方向の法線ベクトルを追加して、簡易的なスムースシェーディング処理を行う
 
         // ポリゴン2
-        buffer.addVertex(matrix, 1, 1, 0).setColor(255, 255, 255, 255).setUv(0, 0).setOverlay(OverlayTexture.NO_OVERLAY).setLight(light).setNormal(normalized[0], normalized[1], normalized[2]);
-        buffer.addVertex(matrix, 1, 0, 0).setColor(255, 255, 255, 255).setUv(0, 1).setOverlay(OverlayTexture.NO_OVERLAY).setLight(light).setNormal(normalized[0], normalized[1], normalized[2]);
+        buffer.addVertex(matrix, 1, 1, 0).setColor(255, 255, 255, 255).setUv(0, 0).setOverlay(OverlayTexture.NO_OVERLAY).setLight(light).setNormal(x, y, z);
+        buffer.addVertex(matrix, 1, 0, 0).setColor(255, 255, 255, 255).setUv(0, 1).setOverlay(OverlayTexture.NO_OVERLAY).setLight(light).setNormal(x, y, z);
         buffer.addVertex(matrix, 1, 0, -1).setColor(255, 255, 255, 255).setUv(1, 1).setOverlay(OverlayTexture.NO_OVERLAY).setLight(light).setNormal(1, 0, 0);
         buffer.addVertex(matrix, 1, 1, -1).setColor(255, 255, 255, 255).setUv(1, 0).setOverlay(OverlayTexture.NO_OVERLAY).setLight(light).setNormal(1, 0, 0);
     }
