@@ -18,7 +18,7 @@ import org.joml.Vector3f;
 
 @OnlyIn(Dist.CLIENT)
 public class CarRenderer extends EntityRenderer<CarEntity> {
-    public static final ResourceLocation TEXTURE = ResourceLocation.fromNamespaceAndPath(PolygonTrainMod.MODID, "textures/white-1024px.png");
+    public static final ResourceLocation TEXTURE = ResourceLocation.fromNamespaceAndPath(PolygonTrainMod.MODID, "textures/uv-checker-1024px.png");
 
     public CarRenderer(EntityRendererProvider.Context context) {
         super(context);
@@ -55,7 +55,7 @@ public class CarRenderer extends EntityRenderer<CarEntity> {
         buffer.addVertex(matrix, 0, 1, 0).setColor(255, 255, 255, 255).setUv(0, 0).setOverlay(OverlayTexture.NO_OVERLAY).setLight(light).setNormal(0, 0, 1);
         buffer.addVertex(matrix, 0, 0, 0).setColor(255, 255, 255, 255).setUv(0, 1).setOverlay(OverlayTexture.NO_OVERLAY).setLight(light).setNormal(0, 0, 1);
         buffer.addVertex(matrix, 1, 0, 0).setColor(255, 255, 255, 255).setUv(1, 1).setOverlay(OverlayTexture.NO_OVERLAY).setLight(light).setNormal(x, y, z);
-        buffer.addVertex(matrix, 1, 1, 0).setColor(255, 255, 255, 255).setUv(1, 1).setOverlay(OverlayTexture.NO_OVERLAY).setLight(light).setNormal(x, y, z);
+        buffer.addVertex(matrix, 1, 1, 0).setColor(255, 255, 255, 255).setUv(1, 0).setOverlay(OverlayTexture.NO_OVERLAY).setLight(light).setNormal(x, y, z);
 
         // 両ポリゴンの重なる2頂点について、ナナメ45度の方向の法線ベクトルを追加して、簡易的なスムースシェーディング処理を行う
 
