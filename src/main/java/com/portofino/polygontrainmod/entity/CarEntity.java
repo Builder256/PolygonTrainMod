@@ -257,7 +257,7 @@ public class CarEntity extends Entity {
         if (aD < 0) turn = -1.0f;
 
         // それはそうと適当に操作を反映
-        this.setYRot(this.getYRot() + turn);
+        this.setYRot(this.getYRot() - turn);
         this.setDeltaMovement(this.getDeltaMovement().x, this.getDeltaMovement().y, -forward);
 
 //
