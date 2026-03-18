@@ -258,6 +258,7 @@ public class CarEntity extends Entity {
 
         // それはそうと適当に操作を反映
         this.setYRot(this.getYRot() - turn);
+        // TODO: 旋回に対応
         this.setDeltaMovement(this.getDeltaMovement().x, this.getDeltaMovement().y, -forward);
 
 //
