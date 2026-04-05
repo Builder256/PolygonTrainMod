@@ -7,7 +7,6 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -46,9 +45,9 @@ public record MQOModel(MQOMaterial[] materials, List<MQOObject> objects) {
     public static final Set<String> omittableGlobalChunkNames;
 
     static {
-        forbiddenGlobalChunkNames = Arrays.stream(GLOBAL_CHUNK_FORBIDDEN).filter(Objects::nonNull).map(String::toLowerCase).collect(Collectors.toUnmodifiableSet());
-        necessaryGlobalChunkNames = Arrays.stream(GLOBAL_CHUNK_NECESSARY).filter(Objects::nonNull).map(String::toLowerCase).collect(Collectors.toUnmodifiableSet());
-        omittableGlobalChunkNames = Arrays.stream(GLOBAL_CHUNK_OMITTABLE).filter(Objects::nonNull).map(String::toLowerCase).collect(Collectors.toUnmodifiableSet());
+        forbiddenGlobalChunkNames = Arrays.stream(GLOBAL_CHUNK_FORBIDDEN).map(String::toLowerCase).collect(Collectors.toUnmodifiableSet());
+        necessaryGlobalChunkNames = Arrays.stream(GLOBAL_CHUNK_NECESSARY).map(String::toLowerCase).collect(Collectors.toUnmodifiableSet());
+        omittableGlobalChunkNames = Arrays.stream(GLOBAL_CHUNK_OMITTABLE).map(String::toLowerCase).collect(Collectors.toUnmodifiableSet());
     }
 
     @Override
