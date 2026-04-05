@@ -14,8 +14,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-import static com.portofino.polygontrainmod.PolygonTrainMod.LOGGER;
-
 /// MQOファイルのパーサー
 @OnlyIn(Dist.CLIENT)
 public final class MQOParser {
@@ -304,7 +302,7 @@ public final class MQOParser {
                         if (count == temp.length) {
                             temp = Arrays.copyOf(temp, temp.length * 2);
                         }
-                        LOGGER.info("{}, {}", start, i);
+//                        LOGGER.info("{}, {}", start, i);
                         temp[count++] = parseFloat(new String(s, start, i - start));
                     } else {
                         i++;
