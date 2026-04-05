@@ -34,6 +34,9 @@ public final class MQOParser {
             if (!isGlobalChunkInitialLine) continue;
 
             final MQOGlobalChunk currentGlobalChunk = extractGlobalChunkName(line);
+            if (currentGlobalChunk == MQOGlobalChunk.FORBIDDEN) {
+                return new MQOParseResult(null, MQOParseResultStatus.FORBIDDEN);
+            }
 
             switch (currentGlobalChunk) {
                 case MATERIAL:
@@ -134,8 +137,11 @@ public final class MQOParser {
             }
         }
 
-        final var model = new MQOModel(materials, objects);
+        if (materials == null || objects.isEmpty()) {
+            return new MQOParseResult(null, MQOParseResultStatus.MISSING);
+        }
 
+        final var model = new MQOModel(materials, objects);
         return new MQOParseResult(model, MQOParseResultStatus.SUCCESS);
     }
 
@@ -391,6 +397,7 @@ public final class MQOParser {
         if (chunkName == null) return MQOGlobalChunk.OTHER; // 無名チャンクは存在しないのでエラーにしてもいいかも？
         if ("Material".equalsIgnoreCase(chunkName)) return MQOGlobalChunk.MATERIAL;
         if ("Object".equalsIgnoreCase(chunkName)) return MQOGlobalChunk.OBJECT;
+        if (MQOModel.forbiddenGlobalChunkNames.contains(chunkName.toLowerCase())) return MQOGlobalChunk.FORBIDDEN;
         return MQOGlobalChunk.OTHER;
     }
 
