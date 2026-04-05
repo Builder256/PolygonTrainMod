@@ -45,16 +45,14 @@ public final class MQOParser {
                     final var currentMaterials = new MQOMaterial[materialQuantity];
                     var matI = 0;
                     while (isNotChunkFinish(line = modelReader.readLine())) {
-                        final var materialName = extractMaterialName(line);
-                        final var currentMaterial = new MQOMaterial(materialName);
-                        currentMaterials[matI++] = currentMaterial;
+                        currentMaterials[matI++] = parseMaterialLine(line);
                     }
                     materials = currentMaterials;
 //                    LOGGER.info("materials: {}", Arrays.toString(materials));
                     break;
                 case OBJECT:
 //                    LOGGER.info("processing object chunk!");
-                    final var name = extractObjectName(line);
+                    final var name = extractFirstQuotedName(line);
                     var isSmoothShadingEnabled = false;
                     var autoSmoothAngle = 59.5f;
                     var mirrorType = 0;
@@ -143,6 +141,11 @@ public final class MQOParser {
 
         final var model = new MQOModel(materials, objects);
         return new MQOParseResult(model, MQOParseResultStatus.SUCCESS);
+    }
+
+    private static @NotNull MQOMaterial parseMaterialLine(@NotNull String materialLine) {
+        final var name = extractFirstQuotedName(materialLine);
+        return new MQOMaterial(name);
     }
 
     private static MQOVertex parseVertexLine(@NotNull String vertexLine) {
@@ -426,36 +429,23 @@ public final class MQOParser {
         return Integer.parseInt(chunkInitialLine.substring(start, i)); // 終了したところで返却
     }
 
-    /// 材質名を抽出する
+    /// 引用符に囲まれている部分を抽出する
     ///
-    /// @param materialLine Materialチャンク内の行
-    private static @NotNull String extractMaterialName(@NotNull String materialLine) {
-        var start = -1; // 材質名の開始インデックス
+    /// @param lineIncludingQuotedName 引用符に囲まれた部分のある行
+    private static @NotNull String extractFirstQuotedName(@NotNull String lineIncludingQuotedName) {
+        final var len = lineIncludingQuotedName.length();
+        var start = -1;
 
-        for (var i = 0; i < materialLine.length(); i++) {
-            final var c = materialLine.charAt(i);
+        for (var i = 0; i < len; i++) {
+            final var c = lineIncludingQuotedName.charAt(i);
             if (c != '"') continue;
 
-            if (start == -1) { // 開始の"を発見
-                start = i + 1; // 次の文字を記録
-            } else { // 開始でないときは終了（通常、内部に"が含まれることはない）
-                return materialLine.substring(start, i);
+            if (start == -1) {
+                start = i + 1;
+            } else {
+                return lineIncludingQuotedName.substring(start, i);
             }
-        }
-        return "";
-    }
 
-    /// オブジェクト名を抽出する
-    ///
-    /// @param objectChunkInitialLine Objectチャンクの開始行
-    private static @NotNull String extractObjectName(@NotNull String objectChunkInitialLine) {
-        final var start = "Object \"".length(); // オブジェクト名の開始インデックス オブジェクト名は8文字目から 7文字目は"
-
-        for (var i = start; i < objectChunkInitialLine.length(); i++) {
-            final var c = objectChunkInitialLine.charAt(i);
-            if (c != '"') continue;
-
-            return objectChunkInitialLine.substring(start, i);
         }
         return "";
     }
