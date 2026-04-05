@@ -2,6 +2,7 @@ package com.portofino.polygontrainmod.client.model.mqo.object;
 
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
+import org.jetbrains.annotations.NotNull;
 
 @OnlyIn(Dist.CLIENT)
 public record MQOObject(
@@ -17,7 +18,7 @@ public record MQOObject(
     MQOFace[] faces
 ) {
     @Override
-    public String toString() {
+    public @NotNull String toString() {
         return "MQOObject{" +
             "name='" + name + '\'' +
             ", isSmoothShadingEnabled=" + isSmoothShadingEnabled +

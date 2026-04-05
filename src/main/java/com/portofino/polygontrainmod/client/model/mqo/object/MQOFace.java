@@ -2,6 +2,7 @@ package com.portofino.polygontrainmod.client.model.mqo.object;
 
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
+import org.jetbrains.annotations.NotNull;
 
 @OnlyIn(Dist.CLIENT)
 public record MQOFace(
@@ -12,7 +13,7 @@ public record MQOFace(
     MQOVector[] normalVectors
 ) {
     @Override
-    public String toString() {
+    public @NotNull String toString() {
         return "MQOFace{" +
             "vertices=" + vertices +
             ", vertexIndices=" + java.util.Arrays.toString(vertexIndices) +
