@@ -12,8 +12,6 @@ import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 import net.neoforged.neoforge.client.gui.ConfigurationScreen;
 import net.neoforged.neoforge.client.gui.IConfigScreenFactory;
 
-import java.util.Objects;
-
 import static com.portofino.polygontrainmod.PolygonTrainMod.LOGGER;
 
 // Modアノテーションに、dist = Dist.CLIENTを指定しているため、このクラスはクライアントサイドにのみ存在するようになるらしい
@@ -39,6 +37,6 @@ public class PolygonTrainModClient {
 //        String mqoFilePath = "models/car/toyota_prius-phv.mqo";
         String mqoFilePath = "models/test-model.mqo";
         MQOModel mqoModel = MQOLoader.load(mqoFilePath);
-        LOGGER.info(Objects.requireNonNull(mqoModel).toString());
+        LOGGER.info(String.valueOf(mqoModel));
     }
 }
