@@ -6,9 +6,9 @@ import net.neoforged.api.distmarker.OnlyIn;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /// MQOモデルを表すオブジェクト
@@ -39,27 +39,21 @@ public record MQOModel(MQOMaterial[] materials, List<MQOObject> objects) {
     };
 
     /// MQOに存在する際、そのファイルの読み込みが禁止されるグローバルチャンク名
-    public static final HashSet<String> forbiddenGlobalChunkNames;
+    public static final Set<String> forbiddenGlobalChunkNames;
     /// 必要不可欠なグローバルチャンク名 これらが無い場合は読み込めない
-    public static final HashSet<String> necessaryGlobalChunkNames;
+    public static final Set<String> necessaryGlobalChunkNames;
     /// 省略可能なグローバルチャンク名 これらに含まれないチャンクが検出されたときに、それが未知の新フォーマットである可能性を考慮すべき
-    public static final HashSet<String> omittableGlobalChunkNames;
+    public static final Set<String> omittableGlobalChunkNames;
 
     static {
-        forbiddenGlobalChunkNames = toHashSet(GLOBAL_CHUNK_FORBIDDEN);
-        necessaryGlobalChunkNames = toHashSet(GLOBAL_CHUNK_NECESSARY);
-        omittableGlobalChunkNames = toHashSet(GLOBAL_CHUNK_OMITTABLE);
+        forbiddenGlobalChunkNames = Arrays.stream(GLOBAL_CHUNK_FORBIDDEN).filter(Objects::nonNull).map(String::toLowerCase).collect(Collectors.toUnmodifiableSet());
+        necessaryGlobalChunkNames = Arrays.stream(GLOBAL_CHUNK_NECESSARY).filter(Objects::nonNull).map(String::toLowerCase).collect(Collectors.toUnmodifiableSet());
+        omittableGlobalChunkNames = Arrays.stream(GLOBAL_CHUNK_OMITTABLE).filter(Objects::nonNull).map(String::toLowerCase).collect(Collectors.toUnmodifiableSet());
     }
 
     @Override
     public @NotNull String toString() {
         return "MQOModel[materials=" + Arrays.toString(materials) + ", objects=" + objects.toString() + "]";
-
-    }
-
-    /// `String[]`を`HashSet<String>`に変換する
-    private static HashSet<String> toHashSet(String[] strings) {
-        return Arrays.stream(strings).filter(Objects::nonNull).map(String::toLowerCase).collect(Collectors.toCollection(HashSet::new));
     }
 }
 
