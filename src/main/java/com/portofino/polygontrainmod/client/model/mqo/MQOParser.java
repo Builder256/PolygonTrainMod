@@ -442,7 +442,7 @@ public final class MQOParser {
     ///
     /// @param objectChunkInitialLine Objectチャンクの開始行
     private static @NotNull String extractObjectName(@NotNull String objectChunkInitialLine) {
-        final var start = 8; // オブジェクト名の開始インデックス オブジェクト名は8文字目から 7文字目は"
+        final var start = "Object \"".length(); // オブジェクト名の開始インデックス オブジェクト名は8文字目から 7文字目は"
 
         for (var i = start; i < objectChunkInitialLine.length(); i++) {
             final var c = objectChunkInitialLine.charAt(i);
