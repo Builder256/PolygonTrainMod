@@ -44,7 +44,9 @@ public final class MQOParser {
                     final var materialQuantity = extractChunkQuantity(line);
                     final var currentMaterials = new MQOMaterial[materialQuantity];
                     var matI = 0;
-                    while (isNotChunkFinish(line = modelReader.readLine())) {
+
+                    // 実際のデータがmaterialQuantityより多かった時にArrayIndexOutOfBoundsExceptionが発生しないように
+                    while (isNotChunkFinish(line = modelReader.readLine()) && matI < materialQuantity) {
                         currentMaterials[matI++] = parseMaterialLine(line);
                     }
                     materials = currentMaterials;
@@ -95,7 +97,7 @@ public final class MQOParser {
                                 final var vertexQuantity = extractChunkQuantity(line);
                                 final var currentVertices = new MQOVertex[vertexQuantity];
                                 var vertexI = 0;
-                                while (isNotChunkFinish(line = modelReader.readLine())) {
+                                while (isNotChunkFinish(line = modelReader.readLine()) && vertexI < vertexQuantity) {
                                     currentVertices[vertexI++] = parseVertexLine(line);
                                 }
                                 vertices = currentVertices;
@@ -105,7 +107,7 @@ public final class MQOParser {
                                 final var faceQuantity = extractChunkQuantity(line);
                                 final var currentFaces = new MQOFace[faceQuantity];
                                 var faceI = 0;
-                                while (isNotChunkFinish(line = modelReader.readLine())) {
+                                while (isNotChunkFinish(line = modelReader.readLine()) && faceI < faceQuantity) {
                                     currentFaces[faceI++] = parseFaceLine(line);
                                 }
                                 faces = currentFaces;
