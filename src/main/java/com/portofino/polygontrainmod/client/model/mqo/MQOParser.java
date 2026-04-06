@@ -391,14 +391,19 @@ public final class MQOParser {
     ///
     /// @param globalChunkInitialLine グローバルチャンクの開始行
     private static @NotNull MQOGlobalChunk extractGlobalChunkName(@NotNull String globalChunkInitialLine) {
-        String chunkName = null;
-        for (int i = 0; i < globalChunkInitialLine.length(); i++) {
+        final var len = globalChunkInitialLine.length();
+        var chunkName = "";
+        var isNameFound = false;
+        for (var i = 0; i < len; i++) {
             if (globalChunkInitialLine.charAt(i) == ' ') {
+                isNameFound = true;
                 chunkName = globalChunkInitialLine.substring(0, i);
                 break;
             }
         }
-        if (chunkName == null) return MQOGlobalChunk.OTHER; // 無名チャンクは存在しないのでエラーにしてもいいかも？
+        if (!isNameFound) chunkName = globalChunkInitialLine; // スペースが見つからなかったときに行自体をチャンク名として扱う（Eofなど）
+
+        if (chunkName.isEmpty()) return MQOGlobalChunk.OTHER; // 無名チャンクは存在しないのでエラーにしてもいいかも？
         if ("Material".equalsIgnoreCase(chunkName)) return MQOGlobalChunk.MATERIAL;
         if ("Object".equalsIgnoreCase(chunkName)) return MQOGlobalChunk.OBJECT;
         if (MQOModel.forbiddenGlobalChunkNames.contains(chunkName.toLowerCase())) return MQOGlobalChunk.FORBIDDEN;
