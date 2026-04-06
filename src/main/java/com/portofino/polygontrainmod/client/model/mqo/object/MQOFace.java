@@ -9,8 +9,8 @@ public record MQOFace(
     int vertices,
     int[] vertexIndices,
     int material,
-    float[][] uvCoordinates,
-    MQOVector[] normalVectors
+    float[][] uvs,
+    MQOVector[] vectors
 ) {
     @Override
     public @NotNull String toString() {
@@ -18,8 +18,8 @@ public record MQOFace(
             "vertices=" + vertices +
             ", vertexIndices=" + java.util.Arrays.toString(vertexIndices) +
             ", material=" + material +
-            ", uvCoordinates=" + java.util.Arrays.deepToString(uvCoordinates) +
-            ", normalVectors=" + java.util.Arrays.toString(normalVectors) +
+            ", uvs=" + java.util.Arrays.deepToString(uvs) +
+            ", vectors=" + java.util.Arrays.toString(vectors) +
             '}';
     }
 }
