@@ -1,5 +1,7 @@
 package com.portofino.polygontrainmod;
 
+import com.portofino.polygontrainmod.client.model.mqo.MQOLoader;
+import com.portofino.polygontrainmod.client.model.mqo.MQOModel;
 import net.minecraft.client.Minecraft;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -9,6 +11,8 @@ import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 import net.neoforged.neoforge.client.gui.ConfigurationScreen;
 import net.neoforged.neoforge.client.gui.IConfigScreenFactory;
+
+import static com.portofino.polygontrainmod.PolygonTrainMod.LOGGER;
 
 // Modアノテーションに、dist = Dist.CLIENTを指定しているため、このクラスはクライアントサイドにのみ存在するようになるらしい
 @Mod(value = PolygonTrainMod.MODID, dist = Dist.CLIENT)
@@ -26,7 +30,13 @@ public class PolygonTrainModClient {
     @SubscribeEvent
     static void onClientSetup(FMLClientSetupEvent event) {
         // クライアントのセットアップ・コード
-        PolygonTrainMod.LOGGER.info("HELLO FROM CLIENT SETUP");
-        PolygonTrainMod.LOGGER.info("MINECRAFT NAME >> {}", Minecraft.getInstance().getUser().getName());
+        LOGGER.info("HELLO FROM CLIENT SETUP");
+        LOGGER.info("MINECRAFT NAME >> {}", Minecraft.getInstance().getUser().getName());
+
+
+//        String mqoFilePath = "models/car/toyota_prius-phv.mqo";
+        String mqoFilePath = "models/test-model.mqo";
+        MQOModel mqoModel = MQOLoader.load(mqoFilePath);
+        LOGGER.info(String.valueOf(mqoModel));
     }
 }
