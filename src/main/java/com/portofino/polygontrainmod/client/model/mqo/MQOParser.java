@@ -380,7 +380,8 @@ public final class MQOParser {
     ///
     /// @param mqoLine どこか一行
     private static boolean isNotChunkFinish(@Nullable String mqoLine) {
-        if (mqoLine == null || mqoLine.isEmpty()) return true;
+        if (mqoLine == null) return false;
+        if (mqoLine.isEmpty()) return true;
 
         final var lastChar = mqoLine.charAt(mqoLine.length() - 1);
         return lastChar != '}';
