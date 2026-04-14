@@ -1,13 +1,12 @@
 package com.portofino.polygontrainmod.entity;
 
-import com.portofino.polygontrainmod.PolygonTrainMod;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerEntity;
-import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.*;
@@ -16,252 +15,310 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
 
- // Entityについて
- // Entityは、BlockやItemと異なり、1つの実体に対して必ず1つのインスタンスを持つ。それによって、より多くの状態と処理を実装できる。
-/**
- * 自動車Entityクラス
- */
-public class CarEntity extends Entity {
-//    private static final EntityDataAccessor<Float> DATA_SPEED =
-//        SynchedEntityData.defineId(CarEntity.class, EntityDataSerializers.FLOAT);
+import static com.portofino.polygontrainmod.util.PolygonTrainModConstants.TICK_PER_SECOND;
+import static com.portofino.polygontrainmod.util.UnitConverter.cm2m;
+import static com.portofino.polygontrainmod.util.UnitConverter.kph2bpt;
 
-    private float momentum;
-    private float deltaRotation;
-    private float acceleration = 0.0f;
-    private final float maxSpeed = 0.4f;
-    private float friction = 0.95f;
-    private final float turnSpeed = 2.0f;
+/// 自動車Entityクラス
+public final class CarEntity extends Entity {
+    //    private static final EntityDataAccessor<Float> DATA_SPEED =
+//        SynchedEntityData.defineId(CarEntity.class, EntityDataSerializers.FLOAT);
+    // 自動車の情報
+
+    /// 乗車定員
+    private static final int RIDING_CAPACITY = 5;
+
+    /// 前輪のZ座標
+    public static final float WHEEL_F_COORD = cm2m(158.62274169921875f);
+    /// 後輪のZ座標
+    public static final float WHEEL_R_COORD = cm2m(-164.98480224609375f);
+    /// ホイールベースの距離
+    private static final float WHEELBASE = WHEEL_F_COORD - WHEEL_R_COORD;
+
+    /// 加速度（ブロック毎ティック毎ティック）
+    private static final float ACCELERATION = 0.001f;
+    /// 減速度 正の値（ブロック毎ティック毎ティック）
+    private static final float DECELERATION = 0.02f;
+    /// 惰性の減速度 正の値（ブロック毎ティック毎ティック）
+    private static final float SLOWDOWN_DECELERATION = 0.1f;
+
+    /// 前進の最高速度 120km/h -> 33.33…m/s -> 1.666…block/tick
+    private static final float MAX_SPEED = kph2bpt(120.0f);
+
+    /// 車両が停止しているとみなす速度の閾値
+    private static final float SPEED_STOP_THRESHOLD = 0.01f;
+    /// ステアリングレシオ
+    public static final float STEERING_RATIO = 1 / 12.0f; // ステアリング角度は、ハンドルの回転角度の12分の1
+
+    /// 左右入力中の1tick当たりのハンドル回転角度（度毎ティック）
+    private static final float STEERING_WHEEL_ANGULAR_VELOCITY_MANIPULATED = 10.0f;
+    /// セルフセンタリングによる1tick当たりのハンドル回転係数（度毎ティック）
+    private static final float STEERING_WHEEL_ANGULAR_VELOCITY_SELF_CENTERING = 5.0f;
+    /// ハンドルの最大回転角度 左右に1.75回転ずつ（度）
+    private static final float STEERING_WHEEL_MAX_ANGLE = 630.0f;
+    /// ハンドルの回転角度
+    public float currentSteeringWheelAngle = 0.0f; // 単位: 度
+    /// 前回tickでのハンドルの回転角度
+    public float prevSteeringWheelAngle = 0.0f;
+
+    /// 踏んでいる間のアクセル開度の変化量
+    private static final float ACCELERATOR_STROKE_CHANGE_RATE = 1 / TICK_PER_SECOND / 3; // 3秒でベタ踏み
+    /// アクセル開度 0~1
+    private float acceleratorStroke = 0.0f;
+    /// 踏んでいる間のブレーキストロークの変化量
+    private static final float BRAKE_STROKE_CHANGE_RATE = 1 / TICK_PER_SECOND; // 1秒でベタ踏み
+    /// ブレーキのストローク量 0~1
+    private float brakeStroke = 0.0f;
+    /// ギアをリバースに入れているか
+    private boolean isReversing = false;
+    /// 現在ブレーキ中か
+    private boolean isBraking = false;
+    /// 前tickでのwSの値
+    private float prevWs = 0;
+    /// ブレーキ中に停止してもキーを押し続けた際に、方向転換をロックする
+    private boolean isReversalLocked = false;
+    /// 速度 前進方向が正、後進方向が負
+    private float speed = 0.0f;
+    /// 現在のtickでのヨーの変化量（度）
+    private float deltaYaw = 0.0f;
 
     public CarEntity(EntityType<? extends CarEntity> entityType, Level level) {
         super(entityType, level);
     }
 
     @Override
-    protected void readAdditionalSaveData(CompoundTag tag) {
+    protected void readAdditionalSaveData(@NotNull CompoundTag tag) {
 //        this.acceleration = tag.getFloat("Acceleration");
     }
 
     @Override
-    protected void addAdditionalSaveData(CompoundTag tag) {
+    protected void addAdditionalSaveData(@NotNull CompoundTag tag) {
 //        tag.putFloat("Acceleration", this.acceleration);
     }
 
     @Override
-    protected void defineSynchedData(SynchedEntityData.Builder builder) {
+    protected void defineSynchedData(SynchedEntityData.@NotNull Builder builder) {
 //        builder.define(DATA_SPEED, 0.0f);
     }
 
-    /**
-     * 右クリックされた時の処理
-     *
-     * @param player 右クリックしたプレイヤー
-     * @param hand   メインハンドまたはオフハンド
-     * @return 処理の完了状態
-     */
+    /// 右クリックされた時の処理
+    ///
+    /// @param player 右クリックしたプレイヤー
+    /// @param hand   メインハンドまたはオフハンド
+    /// @return 処理の完了状態
     @Override
-    @NotNull
-    public InteractionResult interact(Player player, InteractionHand hand) {
+    public @NotNull InteractionResult interact(@NotNull Player player, @NotNull InteractionHand hand) {
+        @SuppressWarnings("resource") // this.levelがAutoCloseableの警告を黙らす
+        final var level = this.level();
         // 今後サーバーサイドであることを保証
-        if (this.level().isClientSide) return InteractionResult.PASS;
+        if (level.isClientSide) return InteractionResult.PASS;
 
-        if (this.getPassengers().isEmpty()) {
+        if (this.canAddPassenger(player)) {
             // 誰も乗っていない
             player.startRiding(this);
-            return InteractionResult.sidedSuccess(this.level().isClientSide);
+            return InteractionResult.sidedSuccess(false);
         }
 
         return InteractionResult.PASS;
     }
 
-    /**
-     * 操縦しているLivingEntity
-     *
-     * @return あればそのLivingEntity、なければnull
-     */
+    @Override
+    protected boolean canAddPassenger(@NotNull Entity passenger) {
+        return this.getPassengers().size() < RIDING_CAPACITY;
+    }
+
+
+    /// 操縦しているLivingEntity
+    ///
+    /// @return あればそのLivingEntity、なければnull
     @Override
     public LivingEntity getControllingPassenger() {
-        Entity controllingEntity = this.getPassengers().isEmpty() ? null : this.getPassengers().getFirst();
+        final var passengers = this.getPassengers();
+        final var controllingEntity = passengers.isEmpty() ? null : passengers.getFirst();
         return controllingEntity instanceof LivingEntity controllingLivingEntity ? controllingLivingEntity : null;
     }
 
-    /**
-     * よくわからん
-     *
-     * @param passenger
-     * @param dimensions
-     * @param scale
-     * @return
-     */
+    /// 渡された乗客Entityの着席位置
+    ///
+    /// @param passenger   乗客Entity
+    /// @param dimensions  自動車の情報 寸法、目の高さなど
+    /// @param partialTick なぜ？
+    /// @return 位置のベクトル
     @Override
     @NotNull
-    protected Vec3 getPassengerAttachmentPoint(@NotNull Entity passenger, EntityDimensions dimensions, float scale) {
-        return new Vec3(0.0D, dimensions.height() * 0.75D, 0.0D);
+    protected Vec3 getPassengerAttachmentPoint(@NotNull Entity passenger, @NotNull EntityDimensions dimensions, float partialTick) {
+        // 友達がいないのでデバッグできません(泣)
+        final var index = this.getPassengers().indexOf(passenger);
+
+        final var baseOffset = calcBaseOffset(index, dimensions);
+
+        final var yRot = this.getViewYRot(partialTick);
+        final var rotatedHorizontalOffset = baseOffset.yRot(-yRot * ((float) Math.PI / 180F));
+
+        return new Vec3(rotatedHorizontalOffset.x, baseOffset.y, rotatedHorizontalOffset.z);
     }
 
-    /**
-     * 謎
-     */
+    private Vec3 calcBaseOffset(int index, EntityDimensions dimensions) {
+        final var heightBase = dimensions.height() * 0.2D;
+        return switch (index) {
+            case 0 -> new Vec3(-0.42, heightBase, 0.1);
+            case 1 -> new Vec3(0.42, heightBase, 0.1);
+            case 2 -> new Vec3(0.42, heightBase, -1.0);
+            case 3 -> new Vec3(-0.42, heightBase, -1.0);
+            case 4 -> new Vec3(0.0, heightBase, -1.0);
+            default -> new Vec3(0.0, dimensions.height() * 0.9, 0.0); // nullが返せないので、Mr.ビーンの場所にしとく
+        };
+    }
+
+    @Override
+    protected void positionRider(@NotNull Entity passenger, Entity.@NotNull MoveFunction callback) {
+        super.positionRider(passenger, callback);
+        if (!(passenger instanceof Player player)) return;
+        player.setYRot(player.getYRot() + this.deltaYaw);
+    }
+
+    /// 謎
     @Override
     public boolean canCollideWith(@NotNull Entity entity) {
         return true;
     }
 
-    /**
-     * 体当たりをして押せるかどうかだと思われる
-     *
-     * @return 常に偽 自動車だし押せなくていいよね
-     */
+    /// 体当たりをして押せるかどうかだと思われる
+    ///
+    /// @return 常に偽 自動車だし押せなくていいよね
     @Override
     public boolean isPushable() {
         return false;
     }
 
-    /**
-     * クリック判定を発生させるかどうかだと思われる
-     *
-     * @return もちろん発生させる じゃないと乗れない
-     */
+    /// クリック判定を発生させるかどうかだと思われる
+    ///
+    /// @return もちろん発生させる じゃないと乗れない
     @Override
     public boolean isPickable() {
         return true;
     }
 
+    /// 用途不明
     @Override
     @NotNull
     public Packet<ClientGamePacketListener> getAddEntityPacket(@NotNull ServerEntity entity) {
         return new ClientboundAddEntityPacket(this, entity);
     }
 
-    /**
-     * 毎Tick呼び出される
-     */
+    /// 毎Tick呼び出される
     @Override
     public void tick() {
         super.tick();
 
-//        if (!this.level().isClientSide()) {
-//            this.serverTick();
-//        } else {
-//            this.clientTick();
-//        }
-//        if (this.isControlledByLocalInstance()) {
-//            this.updateInputs();
-//            this.moveVehicle();
-//            if (this.level().isClientSide()) {
-//                this.controlVehicle();
-//            }
-//        } else {
-//            this.setDeltaMovement(Vec3.ZERO);
-//        }
-//        this.checkInsideBlocks();
+        this.prevSteeringWheelAngle = this.currentSteeringWheelAngle; // アニメーションのために前回tickの回転角度を保存
 
-
-
-        // Entity#isControlledByLocalInstance は、自身が乗っている場合はlocal、そうでなければserverでtrue
+        // Entity#isControlledByLocalInstance は、自身が乗っている場合はクライアント、そうでなければサーバーでtrue
         // Entityの移動操作に使うとよいっぽい
         if (!this.isControlledByLocalInstance()) return;
 
-        Entity driver = this.getControllingPassenger();
-        if (driver instanceof Player player) handlePlayerInput(player);
+        final var driver = this.getControllingPassenger();
+        if (driver instanceof Player drivingPlayer) {
+            this.handlePlayerInput(drivingPlayer);
+        } else {
+            // 操縦手がいない
+            this.updatePedals(); // ペダルのストロークを更新
+            this.updateSteeringAngle(); // ステアリング角度を更新
+        }
 
-        // 実際に移動させる
+        this.updateSpeed(); // 速度を更新
+        this.applyMovement(); // 移動量を計算
+
+        // 移動を実行
         this.move(MoverType.SELF, this.getDeltaMovement());
     }
 
-    private void updateInputs() {
-        Entity controller = this.getControllingPassenger();
-        if (controller instanceof Player) {
-            this.momentum = 0.0F;
-        }
-    }
-
-    private void controlVehicle() {
-        Entity controller = this.getControllingPassenger();
-        if (controller instanceof Player player) {
-            float forward = player.zza;
-            float strafe = player.xxa;
-            String str = String.valueOf(forward + ',' + strafe);
-            PolygonTrainMod.LOGGER.info(str);
-
-            if (forward > 0.0F) {
-                this.momentum += this.acceleration;
-            } else if (forward < 0.0F) {
-                this.momentum -= this.acceleration * 0.5F;
-            } else {
-                this.momentum *= 0.95F;
-            }
-
-            // 最大速度内に制限
-            this.momentum = Math.clamp(this.momentum, -this.maxSpeed, this.maxSpeed);
-
-            if (Math.abs(this.momentum) > 0.01F) {
-                this.deltaRotation = -strafe;
-            } else {
-                this.deltaRotation = 0.0F;
-            }
-        } else {
-            this.momentum = 0.0F;
-            this.deltaRotation = 0.0F;
-        }
-    }
-
-    private void moveVehicle() {
-        // ちょっとでも動いているときだけ車体を回転させる（超信地旋回を拒否）
-        if (Math.abs(this.deltaRotation) > 0.001F && Math.abs(this.momentum) > 0.01F) {
-            float rotation = this.deltaRotation * this.turnSpeed;
-            this.setYRot(this.getYRot() + rotation);
-        }
-
-        double motionX = 0.0;
-        double motionY = this.getDeltaMovement().y;
-        double motionZ = 0.0;
-
-        if (Math.abs(this.momentum) > 0.001F) {
-            float yaw = this.getYRot() * ((float) Math.PI / 180F);
-            motionX = (double) (-Mth.sin(yaw) * this.momentum);
-            motionZ = (double) (Mth.cos(yaw) * this.momentum);
-        }
-
-        if (!this.onGround()) {
-            motionY -= 0.04;
-        } else {
-            motionY = 0.0;
-        }
-
-        this.setDeltaMovement(motionX, motionY, motionZ);
-
-        if (this.isControlledByLocalInstance()) {
-            this.move(MoverType.SELF, this.getDeltaMovement());
-        }
-    }
-
-
+    /// 運転しているプレイヤーの操作を反映する
+    ///
+    /// ### 動作
+    /// - 進行方向のキーでアクセル（`acceleratorStroke`を増加）
+    /// - 進行方向反対のキーでブレーキ（`brakeStroke`を増加）
+    /// - ブレーキで停止したのち、一度離してもう一度押し始めると反対側に進行方向を転換（`isReversing`を逆転）し、
+    ///   そのままその方向に加速を始める
     private void handlePlayerInput(Player player) {
-        // 前後進
-        float forward = 0.0f;
-        // 前進0.98, 後進-0.98
-        float wS = player.zza;
-        // 左0.98, 右-0.98
-        float aD = player.xxa;
 
-//        PolygonTrainMod.LOGGER.info(String.valueOf(W_S) + ',' + A_D);
-        // 前進
-        if (wS > 0) forward = 1.0f;
-        // 後進
-        if (wS < 0) forward = -1.0f;
+        // プレイヤーの操作
+        final float wS = player.zza; // W: 0.98, S: -0.98
+        final float aD = player.xxa; // A: 0.98, D: -0.98
 
-        float turn = 0.0f;
-        // 左旋回
-        if (aD > 0) turn = 1.0f;
-        // 右旋回
-        if (aD < 0) turn = -1.0f;
+        if (wS > 0) { // 前キー（W）
+            final var justStartedW = this.prevWs <= 0;
+            if (!this.isReversing) { // 前進（アクセル）
+                this.brakeStroke = 0;
+                this.isBraking = false;
 
-        // それはそうと適当に操作を反映
-        this.setYRot(this.getYRot() - turn);
-        // TODO: 旋回に対応
-        this.setDeltaMovement(this.getDeltaMovement().x, this.getDeltaMovement().y, -forward);
+                final var stroke = this.acceleratorStroke + ACCELERATOR_STROKE_CHANGE_RATE; // 踏む量を増やす
+                this.acceleratorStroke = Math.clamp(stroke, 0, 1);
+            } else { // 後進（ブレーキ）
+                this.acceleratorStroke = 0;
 
-//
+                if (this.isStopping() && justStartedW && !this.isReversalLocked) { // 新たに押され、ロックされていない
+                    this.isReversing = false; // 前進を開始
+                    this.brakeStroke = 0;
+
+                    final var stroke = this.acceleratorStroke + ACCELERATOR_STROKE_CHANGE_RATE;
+                    this.acceleratorStroke = Math.clamp(stroke, 0, 1);
+                } else {
+                    // 通常のブレーキ処理
+                    if (this.speed >= -SPEED_STOP_THRESHOLD) { // 転換しない場合ロックをセット
+                        this.isReversalLocked = true;
+                    }
+                    final var stroke = this.brakeStroke + BRAKE_STROKE_CHANGE_RATE;
+                    this.brakeStroke = Math.clamp(stroke, 0, 1);
+                }
+            }
+        } else if (wS < 0) { // 後ろキー（S）
+            final var justStartedS = this.prevWs >= 0;
+            if (this.isReversing) { // 後進（アクセル）
+                this.brakeStroke = 0;
+                this.isBraking = false;
+
+                final var stroke = this.acceleratorStroke + ACCELERATOR_STROKE_CHANGE_RATE;
+                this.acceleratorStroke = Math.clamp(stroke, 0, 1);
+            } else { // 前進（ブレーキ）
+                this.acceleratorStroke = 0;
+
+                if (this.isStopping() && justStartedS && !this.isReversalLocked) { // 新たに押され、ロックされていない
+                    this.isReversing = true;
+                    this.brakeStroke = 0;
+
+                    final var stroke = this.acceleratorStroke + ACCELERATOR_STROKE_CHANGE_RATE;
+                    this.acceleratorStroke = Math.clamp(stroke, 0, 1);
+                } else {
+                    // 通常のブレーキ処理
+                    if (this.speed <= SPEED_STOP_THRESHOLD) {
+                        this.isReversalLocked = true;
+                    }
+                    final var stroke = this.brakeStroke + BRAKE_STROKE_CHANGE_RATE;
+                    this.brakeStroke = Math.clamp(stroke, 0, 1);
+                }
+            }
+        } else { // 操作されていない
+            this.isReversalLocked = false; // 方向転換停止を解除
+
+            // 無人の時と同様に処理
+            this.updatePedals();
+        }
+
+        this.prevWs = wS; // wSを保存
+
+        if (aD != 0) {
+            final var angle = this.currentSteeringWheelAngle + Math.signum(aD) * -STEERING_WHEEL_ANGULAR_VELOCITY_MANIPULATED; // Aが正、Dが負だが、ヨーは逆
+            this.currentSteeringWheelAngle = Math.clamp(angle, -STEERING_WHEEL_MAX_ANGLE, STEERING_WHEEL_MAX_ANGLE);
+        } else { // 操作されていない
+            // 無人の時と同様に処理
+            this.updateSteeringAngle();
+        }
+    }
+//         実際の移動
+//        this.setYRot(this.getYRot() + turn);
+//        this.setDeltaMovement(this.getDeltaMovement().x, this.getDeltaMovement().y, this.getDeltaMovement().z + forward);
+
 //        if (forward != 0) {
 //            acceleration += forward * 0.02f;
 //            acceleration = Math.clamp(acceleration, -maxSpeed, maxSpeed);
@@ -279,5 +336,131 @@ public class CarEntity extends Entity {
 //            }
 //        }
 //        this.getEntityData().set(DATA_SPEED, Math.abs(acceleration));
+
+    /// 操作されていないときに自然にペダルを処理する
+    private void updatePedals() {
+        // 踏んだ時と同じ割合で減らす
+        // あるいは即時0？ どちらが実際の運転の感覚と似ているだろうか
+        final var accelStroke = this.acceleratorStroke - ACCELERATOR_STROKE_CHANGE_RATE;
+        this.acceleratorStroke = Math.clamp(accelStroke, 0, 1);
+        final var brakeStroke = this.brakeStroke - BRAKE_STROKE_CHANGE_RATE;
+        this.brakeStroke = Math.clamp(brakeStroke, 0, 1);
+    }
+
+    /// 操作されていないときに自然にステアリングを処理する
+    private void updateSteeringAngle() {
+        // 速度に応じてセルフセンタリングさせる処理
+        // 前進では切れ角を減らし、後進では切れ角を増やす
+    }
+
+    /// 速度を更新する
+    private void updateSpeed() {
+        var speed = 0f;
+        if (!isReversing) { // 前進
+            if (this.acceleratorStroke > 0) speed = this.speed + this.acceleratorStroke * ACCELERATION; // 加速
+            if (this.brakeStroke > 0) speed = this.speed - this.brakeStroke * DECELERATION; // 減速
+            speed = Math.clamp(speed, 0, MAX_SPEED);
+        } else { // 後進
+            if (this.acceleratorStroke > 0) speed = this.speed - this.acceleratorStroke * ACCELERATION; // 後ろに加速
+            if (this.brakeStroke > 0) speed = this.speed + this.brakeStroke * DECELERATION; // 減速
+            speed = Math.clamp(speed, -MAX_SPEED * 0.2f, 0);
+        }
+
+        if (this.acceleratorStroke == 0 && this.brakeStroke == 0) {
+            if (this.speed > 0) { // 前進
+                speed = this.speed - this.speed * SLOWDOWN_DECELERATION; // 惰性での減速
+                speed = Math.clamp(speed, 0, this.speed);
+            } else if (this.speed < 0) { // 後進
+                speed = this.speed - this.speed * SLOWDOWN_DECELERATION;
+                speed = Math.clamp(speed, this.speed, 0);
+            }
+        }
+
+        this.speed = Math.clamp(speed, -MAX_SPEED * 0.2f, MAX_SPEED);
+    }
+
+
+    /// アッカーマンジオメトリを遵守した四輪自動車の移動と回転の結果でdeltaMovementとyawを更新
+    private void applyMovement() {
+        // 正接で面倒が起きないようにステアリング角度が0度に近い場合は直接前進
+        if (Math.abs(this.currentSteeringWheelAngle) < 1) {
+            final var movement = Vec3.directionFromRotation(0, this.getYRot()).scale(this.speed);
+            this.setDeltaMovement(movement);
+            return;
+        }
+
+        // 実舵角（ラジアン）
+        final double steerAngle = Math.toRadians(this.currentSteeringWheelAngle * STEERING_RATIO); // [要確認] STEERING_RATIO
+
+        // 後輪軸基準の旋回半径
+        final double R = WHEELBASE / Math.tan(steerAngle);
+
+        // 1tick あたりのヨー変化量（後輪軸速度 = this.speed と仮定）
+        final double dYawRad = this.speed / R;
+        final float dYawDeg = (float) Math.toDegrees(dYawRad);
+        this.deltaYaw = dYawDeg;
+
+        final float currentYaw = this.getYRot();
+        final Vec3 forward = Vec3.directionFromRotation(0, currentYaw);
+
+        // ① エンティティ原点 → 後輪軸のワールド座標
+        //    WHEEL_R_COORD < 0 なので forward.scale(WHEEL_R_COORD) は後方向
+        final Vec3 rearAxlePos = this.position().add(forward.scale(WHEEL_R_COORD));
+
+        // ② ICR = 後輪軸の右方向に距離 R
+        //    Minecraft の YRot は時計回りが正なので +90 で右方向になる
+        final Vec3 rightVec = Vec3.directionFromRotation(0, currentYaw + 90.0f);
+        final Vec3 icrPos = rearAxlePos.add(rightVec.scale(R));
+
+        // ③ 後輪軸を ICR 周りに dYawRad だけ回転
+        //    Minecraft XZ 平面（上から見て時計回りが正）の回転行列:
+        //      x' = cx + cos(θ)·dx - sin(θ)·dz
+        //      z' = cz + sin(θ)·dx + cos(θ)·dz
+        final double dx = rearAxlePos.x - icrPos.x;
+        final double dz = rearAxlePos.z - icrPos.z;
+        final double cos = Math.cos(dYawRad);
+        final double sin = Math.sin(dYawRad);
+        final Vec3 newRearAxlePos = new Vec3(
+            icrPos.x + cos * dx - sin * dz,
+            rearAxlePos.y,
+            icrPos.z + sin * dx + cos * dz
+        );
+
+        // ④ 新しいヨーと前方向を確定
+        final float newYaw = currentYaw + dYawDeg;
+        final Vec3 newForward = Vec3.directionFromRotation(0, newYaw);
+
+        // ⑤ 後輪軸からエンティティ原点を逆算
+        //    entityPos = rearAxlePos - forward * WHEEL_R_COORD
+        //              = rearAxlePos + forward * |WHEEL_R_COORD|  （WHEEL_R_COORD < 0）
+        final Vec3 newEntityPos = newRearAxlePos.subtract(newForward.scale(WHEEL_R_COORD));
+
+        // ⑥ deltaMovement と yaw を設定
+        this.setDeltaMovement(newEntityPos.subtract(this.position()));
+        this.setYRot(newYaw);
+
+    }
+
+    private boolean isStopping() {
+        return Math.abs(this.speed) < SPEED_STOP_THRESHOLD;
+    }
+
+    private void placeMarker(double x, double y, double z) {
+        @SuppressWarnings("resource") final var level = this.level();
+        level.addParticle(ParticleTypes.FLAME, x, y, z, 0, 0, 0);
+    }
+
+    private void placeMarker(Vec3 vector) {
+        this.placeMarker(vector.x, vector.y, vector.z);
+    }
+
+    private void placeLine(Vec3 start, Vec3 end) {
+        final var direction = end.subtract(start).normalize();
+        final var distance = start.distanceTo(end);
+
+        for (var d = 0d; d < distance; d += 0.1) {
+            var pos = start.add(direction.scale(d));
+            this.placeMarker(pos);
+        }
     }
 }
