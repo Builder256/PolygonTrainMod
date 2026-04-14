@@ -13,14 +13,18 @@ import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.Mth;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 import org.jetbrains.annotations.NotNull;
 import org.joml.Matrix4f;
+import org.joml.Quaternionf;
+import org.joml.Vector3f;
 
 import java.util.*;
 
 import static com.portofino.polygontrainmod.PolygonTrainMod.MODID;
+import static com.portofino.polygontrainmod.util.UnitConverter.cm2m;
 
 @OnlyIn(Dist.CLIENT)
 public final class CarRenderer extends EntityRenderer<CarEntity> {
@@ -39,6 +43,17 @@ public final class CarRenderer extends EntityRenderer<CarEntity> {
     private static final String PART_NAME_STEERED_WHEEL_F_L = "wheelF_L";
     private static final String PART_NAME_STEERED_WHEEL_F_R = "wheelF_R";
     private static final String PART_NAME_WHEEL_R = "wheelR";
+
+    private static final float STEERING_RATIO = CarEntity.STEERING_RATIO;
+    /// ハンドルの中心座標
+    private static final Vector3f COORD_STEERING_WHEEL = new Vector3f(-0.4282f, 1.0729f, 0.513f);
+    /// ハンドルの回転軸のベクトル
+    private static final Vector3f STEERING_WHEEL_ROTATION_CENTER_AXIS = new Vector3f(0.0f, -0.36f, 0.93f).normalize();
+
+    private static final float WHEEL_F_COORD = CarEntity.WHEEL_F_COORD;
+    private static final float WHEEL_R_COORD = CarEntity.WHEEL_R_COORD;
+    private static final float WHEEL_X_COORD = cm2m(72.47766876220703f);
+    private static final Vector3f STEERED_WHEEL_ROTATION_AXIS = new Vector3f(0, 1, 0).normalize();
 
     static {
         // TODO: 頂点法線の計算アルゴリズムを、一般的なものからMetasequoia特有の特殊アルゴリズムで再実装、選択可能にする。
@@ -228,12 +243,61 @@ public final class CarRenderer extends EntityRenderer<CarEntity> {
         poseStack.mulPose(Axis.YP.rotationDegrees(-entityYaw)); // 車両を中心で回転させる 符号を逆転させる必要がある
         // EntityのYawは正の方向から見て時計回りだが、OpenGLのglRotateは正の方向から見て反時計回りだからということだと思う。
 
-        final Matrix4f matrix = poseStack.last().pose();
         // テクスチャごとの描画
         for (var renderGroup : RENDER_GROUPS) {
-            final VertexConsumer buffer = bufferSource.getBuffer(RenderType.entityTranslucentCull(renderGroup.texture)); // 半透明で裏面にカリングをする
+            // 半透明で裏面にカリングをする
+            final VertexConsumer buffer = bufferSource.getBuffer(RenderType.entityTranslucentCull(renderGroup.texture));
             // パーツごとの描画
             for (var part : renderGroup.parts) {
+                var isAnimatedParts = false;
+                if (PART_NAME_STEERING_WHEEL.equals(part.name)) {
+                    isAnimatedParts = true;
+                    poseStack.pushPose();
+
+                    poseStack.translate(COORD_STEERING_WHEEL.x, COORD_STEERING_WHEEL.y, COORD_STEERING_WHEEL.z);
+                    final var rotation = new Quaternionf().rotationAxis(
+                        (float) Math.toRadians(Mth.lerp(
+                            partialTick,
+                            entity.prevSteeringWheelAngle,
+                            entity.currentSteeringWheelAngle
+                        )),
+                        STEERING_WHEEL_ROTATION_CENTER_AXIS
+                    );
+                    poseStack.mulPose(rotation);
+                    poseStack.translate(-COORD_STEERING_WHEEL.x, -COORD_STEERING_WHEEL.y, -COORD_STEERING_WHEEL.z);
+                } else if (PART_NAME_STEERED_WHEEL_F_L.equals(part.name)) {
+                    isAnimatedParts = true;
+                    poseStack.pushPose();
+
+                    poseStack.translate(WHEEL_X_COORD, 0, WHEEL_F_COORD);
+                    final var rotation = new Quaternionf().rotationAxis(
+                        -(float) Math.toRadians(Mth.lerp(
+                            partialTick,
+                            entity.prevSteeringWheelAngle * STEERING_RATIO,
+                            entity.currentSteeringWheelAngle * STEERING_RATIO
+                        )),
+                        STEERED_WHEEL_ROTATION_AXIS
+                    );
+                    poseStack.mulPose(rotation);
+                    poseStack.translate(-WHEEL_X_COORD, 0, -WHEEL_F_COORD);
+                } else if (PART_NAME_STEERED_WHEEL_F_R.equals(part.name)) {
+                    isAnimatedParts = true;
+                    poseStack.pushPose();
+
+                    poseStack.translate(-WHEEL_X_COORD, 0, WHEEL_F_COORD);
+                    final var rotation = new Quaternionf().rotationAxis(
+                        -(float) Math.toRadians(Mth.lerp(
+                            partialTick,
+                            entity.prevSteeringWheelAngle * STEERING_RATIO,
+                            entity.currentSteeringWheelAngle * STEERING_RATIO
+                        )),
+                        STEERED_WHEEL_ROTATION_AXIS
+                    );
+                    poseStack.mulPose(rotation);
+                    poseStack.translate(WHEEL_X_COORD, 0, -WHEEL_F_COORD);
+                }
+
+                final Matrix4f matrix = poseStack.last().pose();
                 // 座標変換が必要な場合は、ここでやったりするのかな
                 // ポリゴンごとの描画
                 for (var polygon : part.polygons) {
@@ -246,6 +310,10 @@ public final class CarRenderer extends EntityRenderer<CarEntity> {
                     if (len == 3) { // 三角ポリゴンの場合は最後の頂点をもう一回追加して四角ポリゴン化
                         addVertexToVertexConsumerAndGetVertexConsumerBack(currentBuffer, matrix, packedLight, polygon.vertices[2]);
                     }
+                }
+
+                if (isAnimatedParts) {
+                    poseStack.popPose();
                 }
             }
         }
@@ -262,11 +330,6 @@ public final class CarRenderer extends EntityRenderer<CarEntity> {
             .setOverlay(OverlayTexture.NO_OVERLAY)
             .setLight(packedLight)
             .setNormal(v.nx, v.ny, v.nz);
-    }
-
-    /// センチメートル単位の値をメートルに変換する
-    private static float cm2m(float cm) {
-        return cm / 100; // 100cm=1m
     }
 
     private record Material(String name, ResourceLocation texture) {
