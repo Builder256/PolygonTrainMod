@@ -472,23 +472,4 @@ public final class CarEntity extends Entity {
     private boolean isStopping() {
         return Math.abs(this.speed) < SPEED_STOP_THRESHOLD;
     }
-
-    private void placeMarker(double x, double y, double z) {
-        @SuppressWarnings("resource") final var level = this.level();
-        level.addParticle(ParticleTypes.FLAME, x, y, z, 0, 0, 0);
-    }
-
-    private void placeMarker(Vec3 vector) {
-        this.placeMarker(vector.x, vector.y, vector.z);
-    }
-
-    private void placeLine(Vec3 start, Vec3 end) {
-        final var direction = end.subtract(start).normalize();
-        final var distance = start.distanceTo(end);
-
-        for (var d = 0.0; d < distance; d += 0.1) {
-            var pos = start.add(direction.scale(d));
-            this.placeMarker(pos);
-        }
-    }
 }

@@ -337,9 +337,6 @@ public final class CarRenderer extends EntityRenderer<CarEntity> {
             .setNormal(v.nx, v.ny, v.nz);
     }
 
-    private record Material(String name, ResourceLocation texture) {
-    }
-
     /// テクスチャごとのパーツの集合
     private record RenderGroup(ResourceLocation texture, List<Part> parts) {
     }
