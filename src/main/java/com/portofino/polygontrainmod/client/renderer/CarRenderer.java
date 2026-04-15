@@ -198,7 +198,7 @@ public final class CarRenderer extends EntityRenderer<CarEntity> {
                     // 三角形ファン方式で分割
                     for (int j = 1; j < faceVertices.size() - 1; j++) {
                         polygons.add(new Polygon(new Vertex[]{
-                            faceVertices.get(0),
+                            faceVertices.getFirst(),
                             faceVertices.get(j),
                             faceVertices.get(j + 1)
                         }));
