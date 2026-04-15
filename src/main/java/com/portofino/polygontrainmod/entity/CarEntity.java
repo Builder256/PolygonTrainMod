@@ -74,11 +74,11 @@ public final class CarEntity extends Entity {
     /// 現在ブレーキ中か
     private boolean isBraking = false;
     /// 前tickでのwSの値
-    private float prevWs = 0;
+    private float prevWs = 0.0f;
     /// ブレーキ中に停止してもキーを押し続けた際に、方向転換をロックする
     private boolean isReversalLocked = false;
     /// 速度 前進方向が正、後進方向が負
-    private float speed = 0.0f;
+    public float speed = 0.0f;
     /// 現在のtickでのヨーの変化量（度）
     private float deltaYaw = 0.0f;
 
@@ -159,7 +159,7 @@ public final class CarEntity extends Entity {
     }
 
     private Vec3 calcBaseOffset(int index, EntityDimensions dimensions) {
-        final var heightBase = dimensions.height() * 0.2D;
+        final var heightBase = dimensions.height() * 0.2;
         return switch (index) {
             case 0 -> new Vec3(-0.42, heightBase, 0.1);
             case 1 -> new Vec3(0.42, heightBase, 0.1);
@@ -246,56 +246,56 @@ public final class CarEntity extends Entity {
         final float wS = player.zza; // W: 0.98, S: -0.98
         final float aD = player.xxa; // A: 0.98, D: -0.98
 
-        if (wS > 0) { // 前キー（W）
-            final var justStartedW = this.prevWs <= 0;
+        if (wS > 0.0f) { // 前キー（W）
+            final var justStartedW = this.prevWs <= 0.0f;
             if (!this.isReversing) { // 前進（アクセル）
-                this.brakeStroke = 0;
+                this.brakeStroke = 0.0f;
                 this.isBraking = false;
 
                 final var stroke = this.acceleratorStroke + ACCELERATOR_STROKE_CHANGE_RATE; // 踏む量を増やす
-                this.acceleratorStroke = Math.clamp(stroke, 0, 1);
+                this.acceleratorStroke = Math.clamp(stroke, 0.0f, 1.0f);
             } else { // 後進（ブレーキ）
                 this.acceleratorStroke = 0;
 
                 if (this.isStopping() && justStartedW && !this.isReversalLocked) { // 新たに押され、ロックされていない
                     this.isReversing = false; // 前進を開始
-                    this.brakeStroke = 0;
+                    this.brakeStroke = 0.0f;
 
                     final var stroke = this.acceleratorStroke + ACCELERATOR_STROKE_CHANGE_RATE;
-                    this.acceleratorStroke = Math.clamp(stroke, 0, 1);
+                    this.acceleratorStroke = Math.clamp(stroke, 0.0f, 1.0f);
                 } else {
                     // 通常のブレーキ処理
                     if (this.speed >= -SPEED_STOP_THRESHOLD) { // 転換しない場合ロックをセット
                         this.isReversalLocked = true;
                     }
                     final var stroke = this.brakeStroke + BRAKE_STROKE_CHANGE_RATE;
-                    this.brakeStroke = Math.clamp(stroke, 0, 1);
+                    this.brakeStroke = Math.clamp(stroke, 0.0f, 1.0f);
                 }
             }
-        } else if (wS < 0) { // 後ろキー（S）
-            final var justStartedS = this.prevWs >= 0;
+        } else if (wS < 0.0f) { // 後ろキー（S）
+            final var justStartedS = this.prevWs >= 0.0f;
             if (this.isReversing) { // 後進（アクセル）
                 this.brakeStroke = 0;
                 this.isBraking = false;
 
                 final var stroke = this.acceleratorStroke + ACCELERATOR_STROKE_CHANGE_RATE;
-                this.acceleratorStroke = Math.clamp(stroke, 0, 1);
+                this.acceleratorStroke = Math.clamp(stroke, 0.0f, 1.0f);
             } else { // 前進（ブレーキ）
-                this.acceleratorStroke = 0;
+                this.acceleratorStroke = 0.0f;
 
                 if (this.isStopping() && justStartedS && !this.isReversalLocked) { // 新たに押され、ロックされていない
                     this.isReversing = true;
-                    this.brakeStroke = 0;
+                    this.brakeStroke = 0.0f;
 
                     final var stroke = this.acceleratorStroke + ACCELERATOR_STROKE_CHANGE_RATE;
-                    this.acceleratorStroke = Math.clamp(stroke, 0, 1);
+                    this.acceleratorStroke = Math.clamp(stroke, 0.0f, 1.0f);
                 } else {
                     // 通常のブレーキ処理
                     if (this.speed <= SPEED_STOP_THRESHOLD) {
                         this.isReversalLocked = true;
                     }
                     final var stroke = this.brakeStroke + BRAKE_STROKE_CHANGE_RATE;
-                    this.brakeStroke = Math.clamp(stroke, 0, 1);
+                    this.brakeStroke = Math.clamp(stroke, 0.0f, 1.0f);
                 }
             }
         } else { // 操作されていない
@@ -342,9 +342,9 @@ public final class CarEntity extends Entity {
         // 踏んだ時と同じ割合で減らす
         // あるいは即時0？ どちらが実際の運転の感覚と似ているだろうか
         final var accelStroke = this.acceleratorStroke - ACCELERATOR_STROKE_CHANGE_RATE;
-        this.acceleratorStroke = Math.clamp(accelStroke, 0, 1);
+        this.acceleratorStroke = Math.clamp(accelStroke, 0.0f, 1.0f);
         final var brakeStroke = this.brakeStroke - BRAKE_STROKE_CHANGE_RATE;
-        this.brakeStroke = Math.clamp(brakeStroke, 0, 1);
+        this.brakeStroke = Math.clamp(brakeStroke, 0.0f, 1.0f);
     }
 
     /// 操作されていないときに自然にステアリングを処理する
@@ -357,22 +357,22 @@ public final class CarEntity extends Entity {
     private void updateSpeed() {
         var speed = 0f;
         if (!isReversing) { // 前進
-            if (this.acceleratorStroke > 0) speed = this.speed + this.acceleratorStroke * ACCELERATION; // 加速
-            if (this.brakeStroke > 0) speed = this.speed - this.brakeStroke * DECELERATION; // 減速
-            speed = Math.clamp(speed, 0, MAX_SPEED);
+            if (this.acceleratorStroke > 0.0f) speed = this.speed + this.acceleratorStroke * ACCELERATION; // 加速
+            if (this.brakeStroke > 0.0f) speed = this.speed - this.brakeStroke * DECELERATION; // 減速
+            speed = Math.clamp(speed, 0.0f, MAX_SPEED);
         } else { // 後進
-            if (this.acceleratorStroke > 0) speed = this.speed - this.acceleratorStroke * ACCELERATION; // 後ろに加速
-            if (this.brakeStroke > 0) speed = this.speed + this.brakeStroke * DECELERATION; // 減速
-            speed = Math.clamp(speed, -MAX_SPEED * 0.2f, 0);
+            if (this.acceleratorStroke > 0.0f) speed = this.speed - this.acceleratorStroke * ACCELERATION; // 後ろに加速
+            if (this.brakeStroke > 0.0f) speed = this.speed + this.brakeStroke * DECELERATION; // 減速
+            speed = Math.clamp(speed, -MAX_SPEED * 0.2f, 0.0f);
         }
 
-        if (this.acceleratorStroke == 0 && this.brakeStroke == 0) {
-            if (this.speed > 0) { // 前進
+        if (this.acceleratorStroke == 0 && this.brakeStroke == 0.0f) {
+            if (this.speed > 0.0f) { // 前進
                 speed = this.speed - this.speed * SLOWDOWN_DECELERATION; // 惰性での減速
                 speed = Math.clamp(speed, 0, this.speed);
-            } else if (this.speed < 0) { // 後進
+            } else if (this.speed < 0.0f) { // 後進
                 speed = this.speed - this.speed * SLOWDOWN_DECELERATION;
-                speed = Math.clamp(speed, this.speed, 0);
+                speed = Math.clamp(speed, this.speed, 0.0f);
             }
         }
 
@@ -458,7 +458,7 @@ public final class CarEntity extends Entity {
         final var direction = end.subtract(start).normalize();
         final var distance = start.distanceTo(end);
 
-        for (var d = 0d; d < distance; d += 0.1) {
+        for (var d = 0.0; d < distance; d += 0.1) {
             var pos = start.add(direction.scale(d));
             this.placeMarker(pos);
         }

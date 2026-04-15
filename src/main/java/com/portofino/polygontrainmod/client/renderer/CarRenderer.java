@@ -57,7 +57,6 @@ public final class CarRenderer extends EntityRenderer<CarEntity> {
 
     static {
         // TODO: 頂点法線の計算アルゴリズムを、一般的なものからMetasequoia特有の特殊アルゴリズムで再実装、選択可能にする。
-        // TODO: AIの書いたアルゴリズムを理解する
         final var objects = MODEL.objects();
         final var materials = MODEL.materials();
 
@@ -98,13 +97,13 @@ public final class CarRenderer extends EntityRenderer<CarEntity> {
                     float ny = az * bx - ax * bz;
                     float nz = ax * by - ay * bx;
                     float r = (float) Math.sqrt(nx * nx + ny * ny + nz * nz);
-                    if (r > 0) {
+                    if (r > 0.0f) {
                         faceNormalsCalculated[i] = new MQOVector(nx / r, ny / r, nz / r);
                     } else {
-                        faceNormalsCalculated[i] = new MQOVector(0, 1, 0); // フォールバック
+                        faceNormalsCalculated[i] = new MQOVector(0.0f, 1.0f, 0.0f); // フォールバック
                     }
                 } else {
-                    faceNormalsCalculated[i] = new MQOVector(0, 1, 0);
+                    faceNormalsCalculated[i] = new MQOVector(0.0f, 1.0f, 0.0f);
                 }
             }
 
@@ -147,8 +146,8 @@ public final class CarRenderer extends EntityRenderer<CarEntity> {
                         nz = customNormals[i].z();
                     }
                     // 2. スムースシェーディングが有効な場合、周辺フェースの法線を平均化
-                    else if (isSmooth && (currentFaceNormal.x() != 0 || currentFaceNormal.y() != 0 || currentFaceNormal.z() != 0)) {
-                        float snx = 0, sny = 0, snz = 0;
+                    else if (isSmooth && (currentFaceNormal.x() != 0.0f || currentFaceNormal.y() != 0.0f || currentFaceNormal.z() != 0.0f)) {
+                        float snx = 0.0f, sny = 0.0f, snz = 0.0f;
                         List<Integer> sharedFaces = vertexToFaces.get(vertexIndex);
                         if (sharedFaces != null) {
                             for (int otherFaceIdx : sharedFaces) {
