@@ -21,6 +21,8 @@ import static com.portofino.polygontrainmod.util.UnitConverter.kph2bpt;
 
 /// 自動車Entityクラス
 public final class CarEntity extends Entity {
+    /// 車輪のX座標オフセット
+    public static final float WHEEL_X_COORD = cm2m(72.47766876220703f);
     //    private static final EntityDataAccessor<Float> DATA_SPEED =
 //        SynchedEntityData.defineId(CarEntity.class, EntityDataSerializers.FLOAT);
     // 自動車の情報
@@ -28,20 +30,25 @@ public final class CarEntity extends Entity {
     /// 乗車定員
     private static final int RIDING_CAPACITY = 5;
 
+    // モデル情報
     /// 前輪のZ座標
     public static final float WHEEL_F_COORD = cm2m(158.62274169921875f);
     /// 後輪のZ座標
     public static final float WHEEL_R_COORD = cm2m(-164.98480224609375f);
+    /// 車輪のY座標
+    public static final float WHEEL_Y_COORD = cm2m(37.28034973144531f);
+    /// 車輪の半径
+    public static final float WHEEL_RADIUS = WHEEL_Y_COORD;
     /// ホイールベースの距離
     private static final float WHEELBASE = WHEEL_F_COORD - WHEEL_R_COORD;
 
+    // 性能
     /// 加速度（ブロック毎ティック毎ティック）
     private static final float ACCELERATION = 0.001f;
     /// 減速度 正の値（ブロック毎ティック毎ティック）
     private static final float DECELERATION = 0.02f;
     /// 惰性の減速度 正の値（ブロック毎ティック毎ティック）
     private static final float SLOWDOWN_DECELERATION = 0.1f;
-
     /// 前進の最高速度 120km/h -> 33.33…m/s -> 1.666…block/tick
     private static final float MAX_SPEED = kph2bpt(120.0f);
 
@@ -61,12 +68,17 @@ public final class CarEntity extends Entity {
     /// 前回tickでのハンドルの回転角度
     public float prevSteeringWheelAngle = 0.0f;
 
+    /// 車輪の回転角度 クライアントのみ
+    public float wheelRotation = 0.0f;
+    /// 前tickでの車輪の回転角度 クライアントのみ
+    public float prevWheelRotation = 0.0f;
+
     /// 踏んでいる間のアクセル開度の変化量
-    private static final float ACCELERATOR_STROKE_CHANGE_RATE = 1 / TICK_PER_SECOND / 3; // 3秒でベタ踏み
+    private static final float ACCELERATOR_STROKE_CHANGE_RATE = 1.0f / TICK_PER_SECOND / 3.0f; // 3秒でベタ踏み
     /// アクセル開度 0~1
     private float acceleratorStroke = 0.0f;
     /// 踏んでいる間のブレーキストロークの変化量
-    private static final float BRAKE_STROKE_CHANGE_RATE = 1 / TICK_PER_SECOND; // 1秒でベタ踏み
+    private static final float BRAKE_STROKE_CHANGE_RATE = 1.0f / TICK_PER_SECOND; // 1秒でベタ踏み
     /// ブレーキのストローク量 0~1
     private float brakeStroke = 0.0f;
     /// ギアをリバースに入れているか
@@ -81,6 +93,7 @@ public final class CarEntity extends Entity {
     public float speed = 0.0f;
     /// 現在のtickでのヨーの変化量（度）
     private float deltaYaw = 0.0f;
+
 
     public CarEntity(EntityType<? extends CarEntity> entityType, Level level) {
         super(entityType, level);
@@ -153,7 +166,7 @@ public final class CarEntity extends Entity {
         final var baseOffset = calcBaseOffset(index, dimensions);
 
         final var yRot = this.getViewYRot(partialTick);
-        final var rotatedHorizontalOffset = baseOffset.yRot(-yRot * ((float) Math.PI / 180F));
+        final var rotatedHorizontalOffset = baseOffset.yRot((float) -Math.toRadians(yRot));
 
         return new Vec3(rotatedHorizontalOffset.x, baseOffset.y, rotatedHorizontalOffset.z);
     }
@@ -170,6 +183,7 @@ public final class CarEntity extends Entity {
         };
     }
 
+    /// 乗客の向きを車両と同期するために使用 詳細不明
     @Override
     protected void positionRider(@NotNull Entity passenger, Entity.@NotNull MoveFunction callback) {
         super.positionRider(passenger, callback);
@@ -211,6 +225,8 @@ public final class CarEntity extends Entity {
     public void tick() {
         super.tick();
 
+        @SuppressWarnings("resource") final var level = this.level();
+
         this.prevSteeringWheelAngle = this.currentSteeringWheelAngle; // アニメーションのために前回tickの回転角度を保存
 
         // Entity#isControlledByLocalInstance は、自身が乗っている場合はクライアント、そうでなければサーバーでtrue
@@ -228,6 +244,10 @@ public final class CarEntity extends Entity {
 
         this.updateSpeed(); // 速度を更新
         this.applyMovement(); // 移動量を計算
+
+        if (level.isClientSide) {
+            updateWheelRotationInClient(); // 車輪の回転を反映
+        }
 
         // 移動を実行
         this.move(MoverType.SELF, this.getDeltaMovement());
@@ -439,6 +459,14 @@ public final class CarEntity extends Entity {
         this.setDeltaMovement(newEntityPos.subtract(this.position()));
         this.setYRot(newYaw);
 
+    }
+
+    /// 車輪の回転角度を更新する クライアントのみ
+    private void updateWheelRotationInClient() {
+        this.prevWheelRotation = this.wheelRotation;
+
+        final var deltaRotation = this.speed / WHEEL_RADIUS;
+        this.wheelRotation += deltaRotation; // 直接加算 340潤ラジアン回ることは多分ないと信じる
     }
 
     private boolean isStopping() {
