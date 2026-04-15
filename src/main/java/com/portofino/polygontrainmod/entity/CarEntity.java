@@ -14,6 +14,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
 
+import static com.portofino.polygontrainmod.util.PolygonTrainModConstants.SECONDS_IN_TICK;
 import static com.portofino.polygontrainmod.util.PolygonTrainModConstants.TICK_PER_SECOND;
 import static com.portofino.polygontrainmod.util.UnitConverter.cm2m;
 import static com.portofino.polygontrainmod.util.UnitConverter.kph2bpt;
@@ -58,8 +59,8 @@ public final class CarEntity extends Entity {
 
     /// 左右入力中の1tick当たりのハンドル回転角度（度毎ティック）
     private static final float STEERING_WHEEL_ANGULAR_VELOCITY_MANIPULATED = 10.0f;
-    /// セルフセンタリングによる1tick当たりのハンドル回転係数（度毎ティック）
-    private static final float STEERING_WHEEL_ANGULAR_VELOCITY_SELF_CENTERING = 5.0f;
+    /// セルフセンタリングによる1tick当たりのハンドル回転係数（単位無し 1ブロック移動するごとに変化させる割合を決める）
+    private static final float STEERING_WHEEL_SELF_CENTERING_PARAMETER = 2.0f;
     /// ハンドルの最大回転角度 左右に1.75回転ずつ（度）
     private static final float STEERING_WHEEL_MAX_ANGLE = 630.0f;
     /// ハンドルの回転角度
@@ -369,7 +370,11 @@ public final class CarEntity extends Entity {
     /// 操作されていないときに自然にステアリングを処理する
     private void updateSteeringAngle() {
         // 速度に応じてセルフセンタリングさせる処理
-        // 前進では切れ角を減らし、後進では切れ角を増やす
+        // 前進では切れ角を減らし、後進では増える
+
+        final var angle = this.currentSteeringWheelAngle;
+        // 移動距離が大きいほど変化量も大きくなる 0に近づくほど変わりづらくなる
+        this.currentSteeringWheelAngle = angle * (1 - STEERING_WHEEL_SELF_CENTERING_PARAMETER * this.speed * SECONDS_IN_TICK);
     }
 
     /// 速度を更新する
