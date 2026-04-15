@@ -64,7 +64,7 @@ public final class CarRenderer extends EntityRenderer<CarEntity> {
 
         final var root = Arrays
             .stream(TEXTURES)
-            .map(texture -> new RenderGroup(texture, new ArrayList<Part>()))
+            .map(texture -> new RenderGroup(texture, new ArrayList<>()))
             .toArray(RenderGroup[]::new);
 
         // オブジェクトごとの処理
