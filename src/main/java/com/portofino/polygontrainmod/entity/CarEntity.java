@@ -121,17 +121,10 @@ public final class CarEntity extends Entity {
     /// @return 処理の完了状態
     @Override
     public @NotNull InteractionResult interact(@NotNull Player player, @NotNull InteractionHand hand) {
-        @SuppressWarnings("resource") // this.levelがAutoCloseableの警告を黙らす
-        final var level = this.level();
-        // 今後サーバーサイドであることを保証
-        if (level.isClientSide) return InteractionResult.PASS;
-
         if (this.canAddPassenger(player)) {
-            // 誰も乗っていない
             player.startRiding(this);
-            return InteractionResult.sidedSuccess(false);
+            return InteractionResult.SUCCESS;
         }
-
         return InteractionResult.PASS;
     }
 
