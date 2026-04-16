@@ -381,6 +381,7 @@ public final class CarEntity extends Entity {
     private void updateSpeed() {
         var speed = 0f;
         if (!isReversing) { // 前進
+            // handlePlayerInputの実装より、acceleratorStrokeとbrakeStrokeが同時に0より大きくなることはない
             if (this.acceleratorStroke > 0.0f) speed = this.speed + this.acceleratorStroke * ACCELERATION; // 加速
             if (this.brakeStroke > 0.0f) speed = this.speed - this.brakeStroke * DECELERATION; // 減速
             speed = Math.clamp(speed, 0.0f, MAX_SPEED);
@@ -414,7 +415,7 @@ public final class CarEntity extends Entity {
         }
 
         // 実舵角（ラジアン）
-        final double steerAngle = Math.toRadians(this.currentSteeringWheelAngle * STEERING_RATIO); // [要確認] STEERING_RATIO
+        final double steerAngle = Math.toRadians(this.currentSteeringWheelAngle * STEERING_RATIO);
 
         // 後輪軸基準の旋回半径
         final double R = WHEELBASE / Math.tan(steerAngle);
