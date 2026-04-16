@@ -38,11 +38,11 @@ public final class CarRenderer extends EntityRenderer<CarEntity> {
     // オブジェクト
     private static final RenderGroup[] RENDER_GROUPS;
 
-    private static final String PART_NAME_BODY = "body";
-    private static final String PART_NAME_STEERING_WHEEL = "steering";
-    private static final String PART_NAME_STEERED_WHEEL_F_L = "wheelF_L";
-    private static final String PART_NAME_STEERED_WHEEL_F_R = "wheelF_R";
-    private static final String PART_NAME_WHEEL_R = "wheelR";
+    private static final String PART_BODY = "body";
+    private static final String PART_STEERING_WHEEL = "steering";
+    private static final String PART_WHEEL_F_L = "wheelF_L";
+    private static final String PART_WHEEL_F_R = "wheelF_R";
+    private static final String PART_WHEEL_R = "wheelR";
 
     /// ハンドルの中心座標
     private static final Vector3f COORD_STEERING_WHEEL = new Vector3f(-0.4282f, 1.0729f, 0.513f);
@@ -271,34 +271,27 @@ public final class CarRenderer extends EntityRenderer<CarEntity> {
             // パーツごとの描画
             for (var part : renderGroup.parts) {
                 var isAnimatedParts = false;
-                if (PART_NAME_STEERING_WHEEL.equals(part.name)) {
-                    isAnimatedParts = true;
-                    poseStack.pushPose();
-
-                    poseStack.translate(COORD_STEERING_WHEEL.x, COORD_STEERING_WHEEL.y, COORD_STEERING_WHEEL.z);
-                    poseStack.mulPose(steeringWheelRotation);
-                    poseStack.translate(-COORD_STEERING_WHEEL.x, -COORD_STEERING_WHEEL.y, -COORD_STEERING_WHEEL.z);
-                } else if (PART_NAME_STEERED_WHEEL_F_L.equals(part.name)) {
-                    isAnimatedParts = true;
-                    poseStack.pushPose();
-
-                    poseStack.translate(CarEntity.WHEEL_X_COORD, CarEntity.WHEEL_Y_COORD, CarEntity.WHEEL_F_COORD);
-                    poseStack.mulPose(steeredWheelRotation);
-                    poseStack.translate(-CarEntity.WHEEL_X_COORD, -CarEntity.WHEEL_Y_COORD, -CarEntity.WHEEL_F_COORD);
-                } else if (PART_NAME_STEERED_WHEEL_F_R.equals(part.name)) {
-                    isAnimatedParts = true;
-                    poseStack.pushPose();
-
-                    poseStack.translate(-CarEntity.WHEEL_X_COORD, CarEntity.WHEEL_Y_COORD, CarEntity.WHEEL_F_COORD);
-                    poseStack.mulPose(steeredWheelRotation);
-                    poseStack.translate(CarEntity.WHEEL_X_COORD, -CarEntity.WHEEL_Y_COORD, -CarEntity.WHEEL_F_COORD);
-                } else if (PART_NAME_WHEEL_R.equals(part.name)) {
-                    isAnimatedParts = true;
-                    poseStack.pushPose();
-
-                    poseStack.translate(0.0f, CarEntity.WHEEL_Y_COORD, CarEntity.WHEEL_R_COORD);
-                    poseStack.mulPose(rotateWheel);
-                    poseStack.translate(0.0f, -CarEntity.WHEEL_Y_COORD, -CarEntity.WHEEL_R_COORD);
+                switch (part.name) {
+                    case PART_STEERING_WHEEL -> {
+                        isAnimatedParts = true;
+                        poseStack.pushPose();
+                        translateAndBack(() -> poseStack.mulPose(steeringWheelRotation), poseStack, COORD_STEERING_WHEEL);
+                    }
+                    case PART_WHEEL_F_L -> {
+                        isAnimatedParts = true;
+                        poseStack.pushPose();
+                        translateAndBack(() -> poseStack.mulPose(steeredWheelRotation), poseStack, CarEntity.WHEEL_X_COORD, CarEntity.WHEEL_Y_COORD, CarEntity.WHEEL_F_COORD);
+                    }
+                    case PART_WHEEL_F_R -> {
+                        isAnimatedParts = true;
+                        poseStack.pushPose();
+                        translateAndBack(() -> poseStack.mulPose(steeredWheelRotation), poseStack, -CarEntity.WHEEL_X_COORD, CarEntity.WHEEL_Y_COORD, CarEntity.WHEEL_F_COORD);
+                    }
+                    case PART_WHEEL_R -> {
+                        isAnimatedParts = true;
+                        poseStack.pushPose();
+                        translateAndBack(() -> poseStack.mulPose(rotateWheel), poseStack, 0.0f, CarEntity.WHEEL_Y_COORD, CarEntity.WHEEL_R_COORD);
+                    }
                 }
 
                 // 座標変換が終了した後に描画用のmatrixを取得しないと、頂点座標に反映されない
@@ -335,6 +328,16 @@ public final class CarRenderer extends EntityRenderer<CarEntity> {
             .setOverlay(OverlayTexture.NO_OVERLAY)
             .setLight(packedLight)
             .setNormal(v.nx, v.ny, v.nz);
+    }
+
+    private static void translateAndBack(Runnable func, PoseStack poseStack, float x, float y, float z) {
+        poseStack.translate(x, y, z);
+        func.run();
+        poseStack.translate(-x, -y, -z);
+    }
+
+    private static void translateAndBack(Runnable func, PoseStack poseStack, Vector3f v) {
+        translateAndBack(func, poseStack, v.x, v.y, v.z);
     }
 
     /// テクスチャごとのパーツの集合
