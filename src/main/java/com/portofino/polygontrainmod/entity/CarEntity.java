@@ -275,7 +275,7 @@ public final class CarEntity extends Entity {
                 final var stroke = this.acceleratorStroke + ACCELERATOR_STROKE_CHANGE_RATE; // 踏む量を増やす
                 this.acceleratorStroke = Math.clamp(stroke, 0.0f, 1.0f);
             } else { // 後進（ブレーキ）
-                this.acceleratorStroke = 0;
+                this.acceleratorStroke = 0.0f;
 
                 if (this.isStopping() && justStartedW && !this.isReversalLocked) { // 新たに押され、ロックされていない
                     this.isReversing = false; // 前進を開始
@@ -295,7 +295,7 @@ public final class CarEntity extends Entity {
         } else if (wS < 0.0f) { // 後ろキー（S）
             final var justStartedS = this.prevWs >= 0.0f;
             if (this.isReversing) { // 後進（アクセル）
-                this.brakeStroke = 0;
+                this.brakeStroke = 0.0f;
                 this.isBraking = false;
 
                 final var stroke = this.acceleratorStroke + ACCELERATOR_STROKE_CHANGE_RATE;
@@ -407,7 +407,7 @@ public final class CarEntity extends Entity {
     /// アッカーマンジオメトリを遵守した四輪自動車の移動と回転の結果でdeltaMovementとyawを更新
     private void applyMovement() {
         // 正接で面倒が起きないようにステアリング角度が0度に近い場合は直接前進
-        if (Math.abs(this.currentSteeringWheelAngle) < 1) {
+        if (Math.abs(this.currentSteeringWheelAngle) < 1.0f) {
             final var movement = Vec3.directionFromRotation(0, this.getYRot()).scale(this.speed);
             this.setDeltaMovement(movement);
             return;
@@ -425,7 +425,7 @@ public final class CarEntity extends Entity {
         this.deltaYaw = dYawDeg;
 
         final float currentYaw = this.getYRot();
-        final Vec3 forward = Vec3.directionFromRotation(0, currentYaw);
+        final Vec3 forward = Vec3.directionFromRotation(0.0f, currentYaw);
 
         // ① エンティティ原点 → 後輪軸のワールド座標
         //    WHEEL_R_COORD < 0 なので forward.scale(WHEEL_R_COORD) は後方向
@@ -433,7 +433,7 @@ public final class CarEntity extends Entity {
 
         // ② ICR = 後輪軸の右方向に距離 R
         //    Minecraft の YRot は時計回りが正なので +90 で右方向になる
-        final Vec3 rightVec = Vec3.directionFromRotation(0, currentYaw + 90.0f);
+        final Vec3 rightVec = Vec3.directionFromRotation(0.0f, currentYaw + 90.0f);
         final Vec3 icrPos = rearAxlePos.add(rightVec.scale(R));
 
         // ③ 後輪軸を ICR 周りに dYawRad だけ回転
