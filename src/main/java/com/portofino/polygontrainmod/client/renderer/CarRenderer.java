@@ -301,12 +301,11 @@ public final class CarRenderer extends EntityRenderer<CarEntity> {
                 for (var polygon : part.polygons) {
                     final var len = polygon.vertices.length;
                     if (len < 3 || len > 4) continue; // 頂点が3個未満、4超過のポリゴンは描画できない
-                    var currentBuffer = buffer;
                     for (var vertex : polygon.vertices) {
-                        currentBuffer = addVertexToVertexConsumerAndGetVertexConsumerBack(currentBuffer, matrix, packedLight, vertex);
+                        appendVertexTo(buffer, matrix, packedLight, vertex);
                     }
                     if (len == 3) { // 三角ポリゴンの場合は最後の頂点をもう一回追加して四角ポリゴン化
-                        addVertexToVertexConsumerAndGetVertexConsumerBack(currentBuffer, matrix, packedLight, polygon.vertices[2]);
+                        appendVertexTo(buffer, matrix, packedLight, polygon.vertices[2]);
                     }
                 }
 
@@ -320,8 +319,8 @@ public final class CarRenderer extends EntityRenderer<CarEntity> {
     }
 
     /// VertexConsumerに頂点を追加する
-    private static VertexConsumer addVertexToVertexConsumerAndGetVertexConsumerBack(VertexConsumer buffer, Matrix4f matrix, int packedLight, Vertex v) {
-        return buffer
+    private static void appendVertexTo(VertexConsumer buffer, Matrix4f matrix, int packedLight, Vertex v) {
+        buffer
             .addVertex(matrix, v.x, v.y, v.z)
             .setColor(255, 255, 255, 255)
             .setUv(v.u, v.v)
