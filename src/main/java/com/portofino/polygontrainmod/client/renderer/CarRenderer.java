@@ -275,22 +275,22 @@ public final class CarRenderer extends EntityRenderer<CarEntity> {
                     case PART_STEERING_WHEEL -> {
                         isAnimatedParts = true;
                         poseStack.pushPose();
-                        translateAndBack(() -> poseStack.mulPose(steeringWheelRotation), poseStack, COORD_STEERING_WHEEL);
+                        rotateParts(poseStack, steeringWheelRotation, COORD_STEERING_WHEEL);
                     }
                     case PART_WHEEL_F_L -> {
                         isAnimatedParts = true;
                         poseStack.pushPose();
-                        translateAndBack(() -> poseStack.mulPose(steeredWheelRotation), poseStack, CarEntity.WHEEL_X_COORD, CarEntity.WHEEL_Y_COORD, CarEntity.WHEEL_F_COORD);
+                        rotateParts(poseStack, steeredWheelRotation, CarEntity.WHEEL_X_COORD, CarEntity.WHEEL_Y_COORD, CarEntity.WHEEL_F_COORD);
                     }
                     case PART_WHEEL_F_R -> {
                         isAnimatedParts = true;
                         poseStack.pushPose();
-                        translateAndBack(() -> poseStack.mulPose(steeredWheelRotation), poseStack, -CarEntity.WHEEL_X_COORD, CarEntity.WHEEL_Y_COORD, CarEntity.WHEEL_F_COORD);
+                        rotateParts(poseStack, steeredWheelRotation, -CarEntity.WHEEL_X_COORD, CarEntity.WHEEL_Y_COORD, CarEntity.WHEEL_F_COORD);
                     }
                     case PART_WHEEL_R -> {
                         isAnimatedParts = true;
                         poseStack.pushPose();
-                        translateAndBack(() -> poseStack.mulPose(rotateWheel), poseStack, 0.0f, CarEntity.WHEEL_Y_COORD, CarEntity.WHEEL_R_COORD);
+                        rotateParts(poseStack, rotateWheel, 0.0f, CarEntity.WHEEL_Y_COORD, CarEntity.WHEEL_R_COORD);
                     }
                 }
 
@@ -329,14 +329,14 @@ public final class CarRenderer extends EntityRenderer<CarEntity> {
             .setNormal(v.nx, v.ny, v.nz);
     }
 
-    private static void translateAndBack(Runnable func, PoseStack poseStack, float x, float y, float z) {
+    private static void rotateParts(PoseStack poseStack, Quaternionf rotation, float x, float y, float z) {
         poseStack.translate(x, y, z);
-        func.run();
+        poseStack.mulPose(rotation);
         poseStack.translate(-x, -y, -z);
     }
 
-    private static void translateAndBack(Runnable func, PoseStack poseStack, Vector3f v) {
-        translateAndBack(func, poseStack, v.x, v.y, v.z);
+    private static void rotateParts(PoseStack poseStack, Quaternionf rotation, Vector3f v) {
+        rotateParts(poseStack, rotation, v.x, v.y, v.z);
     }
 
     /// テクスチャごとのパーツの集合
