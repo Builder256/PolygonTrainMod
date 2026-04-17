@@ -1,7 +1,5 @@
 package com.portofino.polygontrainmod;
 
-import com.portofino.polygontrainmod.client.model.mqo.MQOLoader;
-import com.portofino.polygontrainmod.client.model.mqo.MQOModel;
 import net.minecraft.client.Minecraft;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -32,11 +30,5 @@ public class PolygonTrainModClient {
         // クライアントのセットアップ・コード
         LOGGER.info("HELLO FROM CLIENT SETUP");
         LOGGER.info("MINECRAFT NAME >> {}", Minecraft.getInstance().getUser().getName());
-
-
-//        String mqoFilePath = "models/car/toyota_prius-phv.mqo";
-        String mqoFilePath = "models/test-model.mqo";
-        MQOModel mqoModel = MQOLoader.load(mqoFilePath);
-        LOGGER.info(String.valueOf(mqoModel));
     }
 }
