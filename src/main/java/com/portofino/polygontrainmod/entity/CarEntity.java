@@ -224,7 +224,8 @@ public final class CarEntity extends Entity {
         // Entity#isControlledByLocalInstance は、自身が乗っている場合はクライアント、そうでなければサーバーでtrue
         // Entityの移動操作に使うとよいっぽい
         // マルチプレイでどうなるかはわからないが、テストする友達がいません（泣）
-        if (!this.isControlledByLocalInstance()) return;
+        // 降りた後に惰性で動かないので、とりあえずコメントアウトして無効化 要研究
+//        if (!this.isControlledByLocalInstance()) return;
 
         final var driver = this.getControllingPassenger();
         if (driver instanceof Player drivingPlayer) {
