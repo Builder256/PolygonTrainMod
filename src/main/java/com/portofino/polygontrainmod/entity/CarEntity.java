@@ -16,8 +16,7 @@ import org.jetbrains.annotations.NotNull;
 
 import static com.portofino.polygontrainmod.util.PolygonTrainModConstants.SECONDS_IN_TICK;
 import static com.portofino.polygontrainmod.util.PolygonTrainModConstants.TICK_PER_SECOND;
-import static com.portofino.polygontrainmod.util.UnitConverter.cm2m;
-import static com.portofino.polygontrainmod.util.UnitConverter.kph2bpt;
+import static com.portofino.polygontrainmod.util.UnitConverter.*;
 
 /// 自動車Entityクラス
 public final class CarEntity extends Entity {
@@ -44,11 +43,11 @@ public final class CarEntity extends Entity {
 
     // 性能
     /// 加速度（ブロック毎ティック毎ティック）
-    private static final float ACCELERATION = 0.001f;
+    private static final float ACCELERATION = mpss2bpts(4.15f); // ゼロヒャク6.7秒から計算 約0.01f
     /// 減速度 正の値（ブロック毎ティック毎ティック）
-    private static final float DECELERATION = 0.02f;
+    private static final float DECELERATION = ACCELERATION * 1.2f; // 加速度より少し強め
     /// 惰性の減速度 正の値（ブロック毎ティック毎ティック）
-    private static final float SLOWDOWN_DECELERATION = 0.1f;
+    private static final float SLOWDOWN_DECELERATION = 0.001f;
     /// 前進の最高速度 120km/h -> 33.33…m/s -> 1.666…block/tick
     private static final float MAX_SPEED = kph2bpt(120.0f);
 
