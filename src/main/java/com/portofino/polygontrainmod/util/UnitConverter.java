@@ -21,4 +21,10 @@ public final class UnitConverter {
     public static float s2t(float second) {
         return second * TICK_PER_SECOND;
     }
+
+    /// 加速度の単位メートル毎秒毎秒をブロック毎ティック毎ティックに変換する
+    public static float mpss2bpts(float meterPerSecondSquared) {
+        return meterPerSecondSquared / (TICK_PER_SECOND * TICK_PER_SECOND);
+    }
+
 }
