@@ -1,5 +1,6 @@
 package com.portofino.polygontrainmod;
 
+import com.portofino.polygontrainmod.modelpack.RTMModelPackManager;
 import net.minecraft.client.Minecraft;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -27,5 +28,7 @@ public class PolygonTrainModClient {
         // クライアントのセットアップ・コード
         PolygonTrainMod.LOGGER.info("HELLO FROM CLIENT SETUP");
         PolygonTrainMod.LOGGER.info("MINECRAFT NAME >> {}", Minecraft.getInstance().getUser().getName());
+        com.portofino.polygontrainmod.script.RTMScriptSystem.getInstance().initialize();
+        RTMModelPackManager.INSTANCE.initialize(Minecraft.getInstance().getResourceManager());
     }
 }

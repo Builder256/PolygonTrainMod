@@ -1,0 +1,12 @@
+{
+  "variants": {
+    "facing=0": { "model": "polygontrainmod:block/marker_switch_f0" },
+    "facing=1": { "model": "polygontrainmod:block/marker_switch_f1" },
+    "facing=2": { "model": "polygontrainmod:block/marker_switch_f2" },
+    "facing=3": { "model": "polygontrainmod:block/marker_switch_f3" },
+    "facing=4": { "model": "polygontrainmod:block/marker_switch_f4" },
+    "facing=5": { "model": "polygontrainmod:block/marker_switch_f5" },
+    "facing=6": { "model": "polygontrainmod:block/marker_switch_f6" },
+    "facing=7": { "model": "polygontrainmod:block/marker_switch_f7" }
+  }
+}
