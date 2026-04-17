@@ -373,29 +373,23 @@ public final class CarEntity extends Entity {
 
     /// 速度を更新する
     private void updateSpeed() {
-        var speed = 0f;
-        if (!isReversing) { // 前進
-            // handlePlayerInputの実装より、acceleratorStrokeとbrakeStrokeが同時に0より大きくなることはない
-            if (this.acceleratorStroke > 0.0f) speed = this.speed + this.acceleratorStroke * ACCELERATION; // 加速
-            if (this.brakeStroke > 0.0f) speed = this.speed - this.brakeStroke * DECELERATION; // 減速
-            speed = Math.clamp(speed, 0.0f, MAX_SPEED);
-        } else { // 後進
-            if (this.acceleratorStroke > 0.0f) speed = this.speed - this.acceleratorStroke * ACCELERATION; // 後ろに加速
-            if (this.brakeStroke > 0.0f) speed = this.speed + this.brakeStroke * DECELERATION; // 減速
-            speed = Math.clamp(speed, -MAX_SPEED * 0.2f, 0.0f);
+        var newSpeed = this.speed;
+
+        if (this.acceleratorStroke > 0.0f) {
+            newSpeed += (isReversing ? -1 : +1) * this.acceleratorStroke * ACCELERATION;
+        } else if (this.brakeStroke > 0.0f) {
+            newSpeed += (isReversing ? +1 : -1) * this.brakeStroke * DECELERATION;
+        } else {
+            newSpeed *= 1 - SLOWDOWN_DECELERATION;
         }
 
-        if (this.acceleratorStroke == 0 && this.brakeStroke == 0.0f) {
-            if (this.speed > 0.0f) { // 前進
-                speed = this.speed - this.speed * SLOWDOWN_DECELERATION; // 惰性での減速
-                speed = Math.clamp(speed, 0, this.speed);
-            } else if (this.speed < 0.0f) { // 後進
-                speed = this.speed - this.speed * SLOWDOWN_DECELERATION;
-                speed = Math.clamp(speed, this.speed, 0.0f);
-            }
+        if (isReversing) {
+            newSpeed = Math.clamp(newSpeed, -MAX_SPEED * 0.2f, 0.0f);
+        } else {
+            newSpeed = Math.clamp(newSpeed, 0.0f, MAX_SPEED);
         }
 
-        this.speed = Math.clamp(speed, -MAX_SPEED * 0.2f, MAX_SPEED);
+        this.speed = Math.clamp(newSpeed, -MAX_SPEED * 0.2f, MAX_SPEED);
     }
 
 
