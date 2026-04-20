@@ -1,5 +1,6 @@
 package com.portofino.polygontrainmod;
 
+import com.portofino.polygontrainmod.modelpack.VehicleModelPackManager;
 import net.minecraft.client.Minecraft;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -10,12 +11,9 @@ import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 import net.neoforged.neoforge.client.gui.ConfigurationScreen;
 import net.neoforged.neoforge.client.gui.IConfigScreenFactory;
 
-import static com.portofino.polygontrainmod.PolygonTrainMod.LOGGER;
-
-// Modアノテーションに、dist = Dist.CLIENTを指定しているため、このクラスはクライアントサイドにのみ存在するようになるらしい
+// このクラスは専用サーバーではロードされません。ここからクライアント側のコードにアクセスしても安全です。
 @Mod(value = PolygonTrainMod.MODID, dist = Dist.CLIENT)
-// EventBusSubscriberを使用すると、@SubscribeEventアノテーションのあるこのクラス内のすべての静的メソッドが、
-// Modコンストラクタで登録せずとも自動的に登録されるらしい
+// EventBusSubscriber を使用すると、@SubscribeEvent でアノテーションされたクラス内のすべての静的メソッドを自動的に登録できます。
 @EventBusSubscriber(modid = PolygonTrainMod.MODID, value = Dist.CLIENT)
 public class PolygonTrainModClient {
     public PolygonTrainModClient(ModContainer container) {
@@ -28,7 +26,9 @@ public class PolygonTrainModClient {
     @SubscribeEvent
     static void onClientSetup(FMLClientSetupEvent event) {
         // クライアントのセットアップ・コード
-        LOGGER.info("HELLO FROM CLIENT SETUP");
-        LOGGER.info("MINECRAFT NAME >> {}", Minecraft.getInstance().getUser().getName());
+        PolygonTrainMod.LOGGER.info("HELLO FROM CLIENT SETUP");
+        PolygonTrainMod.LOGGER.info("MINECRAFT NAME >> {}", Minecraft.getInstance().getUser().getName());
+        com.portofino.polygontrainmod.script.TrainScriptSystem.getInstance().initialize();
+        VehicleModelPackManager.INSTANCE.initialize(Minecraft.getInstance().getResourceManager());
     }
 }

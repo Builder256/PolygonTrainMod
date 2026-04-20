@@ -1,0 +1,6 @@
+{
+    "parent": "polygontrainmod:block/marker_base",
+    "textures": {
+        "tex": "polygontrainmod:block/marker_switch"
+    }
+}
