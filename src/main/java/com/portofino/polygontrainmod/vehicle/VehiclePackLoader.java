@@ -90,8 +90,9 @@ public class VehiclePackLoader {
                             PolygonTrainMod.LOGGER.info("Scanning vehicle pack directory: {}", path);
                             loadVehiclePackDirectory(path);
                         }
-                    } else if (path.getFileName().toString().toLowerCase().endsWith(".zip")) {
-                        PolygonTrainMod.LOGGER.info("Scanning vehicle pack zip: {}", path.getFileName());
+                    } else if (isSupportedArchive(path)) {
+                        // 配布形式に依らず同じ入口で処理できるよう、archive としてまとめて扱う。
+                        PolygonTrainMod.LOGGER.info("Scanning vehicle pack archive: {}", path.getFileName());
                         loadVehicleZip(path);
                     }
                 } catch (Exception e) {
@@ -123,6 +124,11 @@ public class VehiclePackLoader {
         try (InputStream is = Files.newInputStream(zipPath)) {
             loadVehiclePack(is, zipPath.getFileName().toString());
         }
+    }
+
+    private static boolean isSupportedArchive(Path path) {
+        String fileName = path.getFileName().toString().toLowerCase(Locale.ROOT);
+        return fileName.endsWith(".zip") || fileName.endsWith(".jar");
     }
 
     private static void loadVehiclePackDirectory(Path packDir) throws IOException {
@@ -200,18 +206,6 @@ public class VehiclePackLoader {
             if (scriptPath == null || scriptPath.isBlank()) {
                 scriptPath = getString(obj, "scriptPath");
             }
-            String soundScriptPath = getString(obj, "soundScriptPath");
-            PolygonTrainMod.LOGGER.info(
-                "Vehicle '{}' script refs: rendererPath(trainModel)='{}', renderScriptPath(trainModel)='{}', rendererPath(root)='{}', renderScriptPath(root)='{}', scriptPath(root)='{}', soundScriptPath(root)='{}' => selected='{}'",
-                id,
-                getString(trainModel, "rendererPath"),
-                getString(trainModel, "renderScriptPath"),
-                getString(obj, "rendererPath"),
-                getString(obj, "renderScriptPath"),
-                getString(obj, "scriptPath"),
-                soundScriptPath,
-                scriptPath
-            );
 
             String doorType = getString(trainModel, "doorType");
             if (doorType == null || doorType.isBlank()) {
@@ -302,24 +296,6 @@ public class VehiclePackLoader {
                 acceleration,
                 smoothing
             ));
-            PolygonTrainMod.LOGGER.info(
-                "Registered vehicle definition id='{}' pack='{}' model='{}' bogies={} seats={} playerPos={} trainDistance={} frontDriverSeatIndex={} rearDriverSeatIndex={} doors(L/R)={}/{} maxSpeeds={} acceleration={} smoothing={} script='{}'",
-                id,
-                packName,
-                modelFile,
-                bogies.size(),
-                seats.size(),
-                playerPositions.size(),
-                trainDistance,
-                frontDriverSeatIndex,
-                rearDriverSeatIndex,
-                leftDoors.size(),
-                rightDoors.size(),
-                notchMaxSpeeds.size(),
-                acceleration,
-                smoothing,
-                scriptPath
-            );
         } catch (Exception e) {
             PolygonTrainMod.LOGGER.warn("Failed to parse train json in {}: {}", packName, e.getMessage());
         }
@@ -598,5 +574,3 @@ public class VehiclePackLoader {
         return null;
     }
 }
-
-

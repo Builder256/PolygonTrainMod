@@ -41,7 +41,7 @@ public class RailPackLoader {
             Path packsDir = ModList.get().getModFileById(PolygonTrainMod.MODID).getFile()
                 .findResource("assets", "polygontrainmod", "rail_packs");
             if (packsDir != null && Files.isDirectory(packsDir)) {
-                loadZipDirectory(packsDir);
+                loadArchiveDirectory(packsDir);
             }
         } catch (Exception e) {
             PolygonTrainMod.LOGGER.warn("Could not load rail packs from mod jar", e);
@@ -53,7 +53,7 @@ public class RailPackLoader {
             try {
                 Path externalDir = FMLPaths.GAMEDIR.get().resolve("config").resolve("polygontrainmod");
                 if (!dirName.isEmpty()) externalDir = externalDir.resolve(dirName);
-                if (Files.isDirectory(externalDir)) loadZipDirectory(externalDir);
+                if (Files.isDirectory(externalDir)) loadArchiveDirectory(externalDir);
             } catch (Exception e) {
                 PolygonTrainMod.LOGGER.warn("Could not scan external rail packs {}", dirName, e);
             }
@@ -64,22 +64,23 @@ public class RailPackLoader {
         try {
             Path gameDir = FMLPaths.GAMEDIR.get();
             if (Files.isDirectory(gameDir)) {
-                loadZipDirectory(gameDir);
+                loadArchiveDirectory(gameDir);
                 Path modsDir = gameDir.resolve("mods");
-                if (Files.isDirectory(modsDir)) loadZipDirectory(modsDir);
+                if (Files.isDirectory(modsDir)) loadArchiveDirectory(modsDir);
             }
             Path contentDir = gameDir.resolve("content");
-            if (Files.isDirectory(contentDir)) loadZipDirectory(contentDir);
+            if (Files.isDirectory(contentDir)) loadArchiveDirectory(contentDir);
             Path vp = gameDir.resolve("vehicle_packs");
-            if (Files.isDirectory(vp)) loadZipDirectory(vp);
+            if (Files.isDirectory(vp)) loadArchiveDirectory(vp);
         } catch (Exception e) {
             PolygonTrainMod.LOGGER.warn("Could not scan game directory for rail packs", e);
         }
     }
 
-    private static void loadZipDirectory(Path dir) throws IOException {
+    private static void loadArchiveDirectory(Path dir) throws IOException {
         try (var stream = Files.list(dir)) {
-            stream.filter(p -> p.getFileName().toString().toLowerCase().endsWith(".zip"))
+            // RTM 系 pack は zip / jar の両方で配られるので、入口は archive に寄せる。
+            stream.filter(RailPackLoader::isSupportedArchive)
                 .forEach(zipPath -> {
                     try (InputStream is = Files.newInputStream(zipPath)) {
                         loadRailPack(is, zipPath.getFileName().toString());
@@ -88,6 +89,11 @@ public class RailPackLoader {
                     }
                 });
         }
+    }
+
+    private static boolean isSupportedArchive(Path path) {
+        String fileName = path.getFileName().toString().toLowerCase();
+        return fileName.endsWith(".zip") || fileName.endsWith(".jar");
     }
 
     public static synchronized void reload() {

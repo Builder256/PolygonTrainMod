@@ -21,6 +21,9 @@ public class InstalledObjectBlockEntity extends BlockEntity {
     private int barMoveCount;
     private int lightCount = -1;
     private int tickCountOnActive;
+    private double offsetX;
+    private double offsetY;
+    private double offsetZ;
 
     public InstalledObjectBlockEntity(BlockPos pos, BlockState blockState) {
         super(PolygonTrainModBlockEntities.INSTALLED_OBJECT.get(), pos, blockState);
@@ -46,6 +49,9 @@ public class InstalledObjectBlockEntity extends BlockEntity {
         tag.putInt("BarMoveCount", barMoveCount);
         tag.putInt("LightCount", lightCount);
         tag.putInt("TickCountOnActive", tickCountOnActive);
+        tag.putDouble("OffsetX", offsetX);
+        tag.putDouble("OffsetY", offsetY);
+        tag.putDouble("OffsetZ", offsetZ);
     }
 
     @Override
@@ -60,6 +66,9 @@ public class InstalledObjectBlockEntity extends BlockEntity {
         barMoveCount = tag.getInt("BarMoveCount");
         lightCount = tag.contains("LightCount") ? tag.getInt("LightCount") : -1;
         tickCountOnActive = tag.getInt("TickCountOnActive");
+        offsetX = tag.getDouble("OffsetX");
+        offsetY = tag.getDouble("OffsetY");
+        offsetZ = tag.getDouble("OffsetZ");
     }
 
     @Override
@@ -93,6 +102,17 @@ public class InstalledObjectBlockEntity extends BlockEntity {
 
     public float getYaw() {
         return yaw;
+    }
+
+    public void setRenderOffset(double offsetX, double offsetY, double offsetZ) {
+        this.offsetX = offsetX;
+        this.offsetY = offsetY;
+        this.offsetZ = offsetZ;
+        setChanged();
+    }
+
+    public Vec3 getRenderOffset() {
+        return new Vec3(offsetX, offsetY, offsetZ);
     }
 
     public void setWireEndpoints(BlockPos start, BlockPos end) {

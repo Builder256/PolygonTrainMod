@@ -43,6 +43,8 @@ public class InstalledObjectBlockEntityRenderer implements BlockEntityRenderer<I
             if (model != null) {
                 poseStack.pushPose();
                 poseStack.translate(0.5D, 0.0D, 0.5D);
+                Vec3 renderOffset = blockEntity.getRenderOffset();
+                poseStack.translate(renderOffset.x, renderOffset.y, renderOffset.z);
                 poseStack.mulPose(Axis.YP.rotationDegrees(180.0F - blockEntity.getYaw()));
                 poseStack.translate(definition.getModelOffset().x, definition.getModelOffset().y, definition.getModelOffset().z);
                 poseStack.scale(definition.getModelScale(), definition.getModelScale(), definition.getModelScale());

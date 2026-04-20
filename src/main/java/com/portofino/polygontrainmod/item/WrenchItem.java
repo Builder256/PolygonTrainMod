@@ -46,38 +46,48 @@ public class WrenchItem extends Item {
         BlockPos clickedPos = context.getClickedPos();
         BlockEntity clickedBe = level.getBlockEntity(clickedPos);
         ItemStack previewStack = findPreviewStack(player);
+        CompoundTag previewTag = previewStack.isEmpty() ? null : previewStack.get(PolygonTrainModComponents.RAIL_PREVIEW_START.get());
+        if (clickedBe instanceof MarkerBlockEntity marker
+            && level.getBlockState(clickedPos).getBlock() instanceof MarkerBlock markerBlock
+            && player.isShiftKeyDown()) {
+            ItemStack targetStack = findRailStack(player);
+            if (targetStack.isEmpty()) {
+                targetStack = previewStack.isEmpty() ? player.getItemInHand(context.getHand()) : previewStack;
+            }
+            if (!beginWrenchPreview(level, clickedPos, marker, markerBlock, targetStack)) {
+                player.displayClientMessage(Component.literal("接続先のマーカーが見つかりません"), true);
+                return InteractionResult.sidedSuccess(level.isClientSide());
+            }
+            player.displayClientMessage(Component.literal("レール調整を再検知しました"), true);
+            return InteractionResult.sidedSuccess(level.isClientSide());
+        }
+        if (clickedBe instanceof MarkerBlockEntity
+            && level.getBlockState(clickedPos).getBlock() instanceof MarkerBlock
+            && previewTag != null
+            && previewTag.getBoolean("WrenchMode")) {
+            ItemStack railStack = findRailStack(player);
+            if (railStack.isEmpty()) {
+                player.displayClientMessage(Component.literal("調整したレールを確定するにはレールアイテムが必要です"), true);
+                return InteractionResult.sidedSuccess(level.isClientSide());
+            }
+            if (!level.isClientSide()) {
+                String selectedId = railStack.get(PolygonTrainModComponents.SELECTED_MODEL_ID.get());
+                boolean created = MarkerBlock.placeRailFromItem(level, clickedPos, player, railStack, selectedId);
+                if (created && !player.getAbilities().instabuild) {
+                    railStack.shrink(1);
+                }
+            }
+            return InteractionResult.sidedSuccess(level.isClientSide());
+        }
         if (clickedBe instanceof MarkerBlockEntity marker && level.getBlockState(clickedPos).getBlock() instanceof MarkerBlock) {
             ItemStack targetStack = findRailStack(player);
             if (targetStack.isEmpty()) {
                 targetStack = previewStack.isEmpty() ? player.getItemInHand(context.getHand()) : previewStack;
             }
-            RailPosition start = marker.getMarkerRP();
-            if (start == null) {
-                return InteractionResult.PASS;
-            }
-            List<RailPosition> ends = findOtherMarkers(level, clickedPos, start);
-            if (ends.isEmpty()) {
+            if (!beginWrenchPreview(level, clickedPos, marker, (MarkerBlock) level.getBlockState(clickedPos).getBlock(), targetStack)) {
                 player.displayClientMessage(Component.literal("接続先のマーカーが見つかりません"), true);
                 return InteractionResult.sidedSuccess(level.isClientSide());
             }
-            CompoundTag tag = new CompoundTag();
-            tag.putInt("X", clickedPos.getX());
-            tag.putInt("Y", clickedPos.getY());
-            tag.putInt("Z", clickedPos.getZ());
-            tag.putBoolean("WrenchMode", true);
-            tag.putBoolean("BranchMode", ends.size() > 1 || ((MarkerBlock) level.getBlockState(clickedPos).getBlock()).isSwitch);
-            tag.put("StartRP", start.writeToNBT());
-            ListTag segments = new ListTag();
-            for (RailPosition end : ends) {
-                CompoundTag segment = new CompoundTag();
-                segment.put("EndRP", end.writeToNBT());
-                putDefaultAnchors(segment, start, end);
-                segments.add(segment);
-            }
-            tag.put("RailSegments", segments);
-            tag.put("EndRP", ends.get(0).writeToNBT());
-            copySegmentAnchorsToRoot(tag, segments.getCompound(0));
-            targetStack.set(PolygonTrainModComponents.RAIL_PREVIEW_START.get(), tag);
             player.displayClientMessage(Component.literal("レール調整: 動かしたい場所をレンチで右クリック"), true);
             return InteractionResult.sidedSuccess(level.isClientSide());
         }
@@ -87,6 +97,37 @@ public class WrenchItem extends Item {
         }
         showOffsetMessage(level, player, previewStack);
         return InteractionResult.sidedSuccess(level.isClientSide());
+    }
+
+    private static boolean beginWrenchPreview(Level level, BlockPos clickedPos, MarkerBlockEntity marker, MarkerBlock markerBlock, ItemStack targetStack) {
+        RailPosition start = marker.getMarkerRP();
+        if (start == null) {
+            return false;
+        }
+        List<RailPosition> ends = findOtherMarkers(level, clickedPos, start);
+        if (ends.isEmpty()) {
+            return false;
+        }
+        CompoundTag tag = new CompoundTag();
+        tag.putInt("X", clickedPos.getX());
+        tag.putInt("Y", clickedPos.getY());
+        tag.putInt("Z", clickedPos.getZ());
+        tag.putBoolean("WrenchMode", true);
+        tag.putBoolean("BranchMode", ends.size() > 1 || markerBlock.isSwitch);
+        tag.put("StartRP", start.writeToNBT());
+        ListTag segments = new ListTag();
+        for (RailPosition end : ends) {
+            // 分岐でも個別に再現できるよう、各終点ごとにアンカー情報を持たせておく。
+            CompoundTag segment = new CompoundTag();
+            segment.put("EndRP", end.writeToNBT());
+            putDefaultAnchors(segment, start, end);
+            segments.add(segment);
+        }
+        tag.put("RailSegments", segments);
+        tag.put("EndRP", ends.get(0).writeToNBT());
+        copySegmentAnchorsToRoot(tag, segments.getCompound(0));
+        targetStack.set(PolygonTrainModComponents.RAIL_PREVIEW_START.get(), tag);
+        return true;
     }
 
     @Override
@@ -184,7 +225,8 @@ public class WrenchItem extends Item {
         copy.anchorLengthHorizontal = (float) Math.sqrt(dx * dx + dz * dz);
         double dy = ay - copy.posY;
         copy.anchorPitch = copy.anchorLengthHorizontal <= 1.0e-4F ? 0.0F : (float) Math.toDegrees(Math.atan2(dy, copy.anchorLengthHorizontal));
-        copy.anchorLengthVertical = (float) Math.sqrt(copy.anchorLengthHorizontal * copy.anchorLengthHorizontal + dy * dy);
+        // legacy RTM と同じく LenV には斜辺ではなく平面距離を入れ、上下量は pitch 側で表す。
+        copy.anchorLengthVertical = copy.anchorLengthHorizontal;
         return copy;
     }
 
@@ -244,7 +286,7 @@ public class WrenchItem extends Item {
         return ItemStack.EMPTY;
     }
 
-    private static void clearInvalidPreviewTags(Player player, Level level) {
+    public static void clearInvalidPreviewTags(Player player, Level level) {
         for (InteractionHand hand : InteractionHand.values()) {
             ItemStack stack = player.getItemInHand(hand);
             CompoundTag tag = stack.get(PolygonTrainModComponents.RAIL_PREVIEW_START.get());

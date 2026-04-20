@@ -26,6 +26,7 @@ import java.awt.image.BufferedImage;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.BitSet;
 import java.util.Iterator;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -85,9 +86,9 @@ public final class MqoModelLoader {
             PolygonTrainMod.LOGGER.warn("loadModelForVehicle: def is null");
             return null;
         }
-        // キャッシュキーにスクリプトパスを含める
         String scriptPath = def.getScriptPath() != null ? def.getScriptPath() : "";
-        String key = "v|" + def.getPackName() + "|" + def.getModelFile() + "|" + def.getTextureOverrides().hashCode() + "|" + scriptPath.hashCode() + "|" + def.isSmoothing();
+        // legacy script は init() で trainName/modelName ごとの差分を固定するため、車両ID単位で分離する
+        String key = "v|" + def.getId() + "|" + def.getPackName() + "|" + def.getModelFile() + "|" + def.getTextureOverrides().hashCode() + "|" + scriptPath.hashCode() + "|" + def.isSmoothing();
         if (MODEL_CACHE.containsKey(key)) {
             return MODEL_CACHE.get(key);
         }
@@ -101,7 +102,7 @@ public final class MqoModelLoader {
         MqoModel model = loadInternal(packPath, def.getModelFile(), def.getTextureOverrides(), def.isSmoothing());
         if (model != null) {
             PolygonTrainMod.LOGGER.info("loadModelForVehicle: model loaded, loading script");
-            loadScriptForModel(model, packPath, def.getScriptPath());
+            loadScriptForModel(model, packPath, def.getScriptPath(), def.getId());
             MODEL_CACHE.put(key, model);
         } else {
             PolygonTrainMod.LOGGER.warn("loadModelForVehicle: model is null");
@@ -373,14 +374,15 @@ public final class MqoModelLoader {
         byte matId = (byte) parseMaterialId(line);
         TextureInfo textureInfo = resolveTexture(matId, materialOrder, textureOverrides, opener);
         int matKey = matId & 0xFF;
-        String batchKey = groupName + "|" + matKey;
-        BatchBuilder bb = byGroup.computeIfAbsent(batchKey, k -> new BatchBuilder(groupName, textureInfo.location, matKey, textureInfo.hasAlpha));
-
         String vi = matchGroup(V_PATTERN, line);
         String uv = matchGroup(UV_PATTERN, line);
         if (vi == null) return;
         String[] vidx = vi.trim().split("\\s+");
         float[] uvs = parseUv(uv, vertexCount);
+        // 材質単位ではなく、この面が触っている UV 範囲だけで半透明判定する。
+        boolean translucent = textureInfo.isTranslucent(uvs, vertexCount);
+        String batchKey = groupName + "|" + matKey + "|" + translucent;
+        BatchBuilder bb = byGroup.computeIfAbsent(batchKey, k -> new BatchBuilder(groupName, textureInfo.location, matKey, translucent));
 
         if (vertexCount == 4) {
             addQuad(verts, vidx, uvs, matId, bb, mirrorType);
@@ -558,6 +560,10 @@ public final class MqoModelLoader {
     }
 
     private static void loadScriptForModel(MqoModel model, Path packPath, String scriptPath) {
+        loadScriptForModel(model, packPath, scriptPath, null);
+    }
+
+    private static void loadScriptForModel(MqoModel model, Path packPath, String scriptPath, String modelName) {
         if (model == null || packPath == null) {
             PolygonTrainMod.LOGGER.warn("loadScriptForModel: model or packPath is null");
             return;
@@ -576,7 +582,7 @@ public final class MqoModelLoader {
                 }
                 if (legacyScript != null && !legacyScript.isBlank()) {
                     PolygonTrainMod.LOGGER.info("Loaded legacy script from resource manager: {}, length={}", normalized, legacyScript.length());
-                    TrainScriptSystem.loadScript(normalized, legacyScript, model);
+                    TrainScriptSystem.loadScript(normalized, legacyScript, model, modelName);
                     return;
                 }
             }
@@ -605,14 +611,14 @@ public final class MqoModelLoader {
                     String script = Files.readString(scriptFile, StandardCharsets.UTF_8);
                     script = preprocessScriptIncludesForDirectory(scriptFile, rootDirectory(packPath));
                     PolygonTrainMod.LOGGER.info("Script file loaded, length={}", script.length());
-                    TrainScriptSystem.loadScript(normalized, script, model);
+                    TrainScriptSystem.loadScript(normalized, script, model, modelName);
                 } else {
                     Path fallback = findFallbackScriptFile(packPath);
                     if (fallback != null) {
                         PolygonTrainMod.LOGGER.warn("Model script {} not found in pack directory {}; using fallback {}", normalized, packPath, fallback);
                         String script = Files.readString(fallback, StandardCharsets.UTF_8);
                         script = preprocessScriptIncludesForDirectory(fallback, rootDirectory(packPath));
-                        TrainScriptSystem.loadScript(fallback.toString(), script, model);
+                        TrainScriptSystem.loadScript(fallback.toString(), script, model, modelName);
                     } else {
                         if (hasExplicitPath) {
                             PolygonTrainMod.LOGGER.warn("Model script not found in pack directory: {} (normalized={})", packPath, normalized);
@@ -635,7 +641,7 @@ public final class MqoModelLoader {
                         try (InputStream in = zf.getInputStream(entry)) {
                             String script = new String(in.readAllBytes(), StandardCharsets.UTF_8);
                             script = preprocessScriptIncludesForZip(zf, entry.getName(), script);
-                            TrainScriptSystem.loadScript(normalized, script, model);
+                            TrainScriptSystem.loadScript(normalized, script, model, modelName);
                         }
                     } else {
                         ZipEntry fallback = findFallbackScriptEntry(zf);
@@ -644,7 +650,7 @@ public final class MqoModelLoader {
                             try (InputStream in = zf.getInputStream(fallback)) {
                                 String script = new String(in.readAllBytes(), StandardCharsets.UTF_8);
                                 script = preprocessScriptIncludesForZip(zf, fallback.getName(), script);
-                                TrainScriptSystem.loadScript(fallback.getName(), script, model);
+                                TrainScriptSystem.loadScript(fallback.getName(), script, model, modelName);
                             }
                         } else {
                             if (hasExplicitPath) {
@@ -824,34 +830,35 @@ public final class MqoModelLoader {
             if (in != null) {
                 byte[] data = in.readAllBytes();
                 com.mojang.blaze3d.platform.NativeImage img = com.mojang.blaze3d.platform.NativeImage.read(new ByteArrayInputStream(data));
-                boolean hasAlpha = imageHasAlpha(ImageIO.read(new ByteArrayInputStream(data)));
+                AlphaMask alphaMask = readAlphaMask(ImageIO.read(new ByteArrayInputStream(data)));
                 DynamicTexture tex = new DynamicTexture(img);
                 ResourceLocation loc = ResourceLocation.fromNamespaceAndPath(PolygonTrainMod.MODID,
                     "dynamic/mqo/" + Integer.toHexString(path.hashCode()));
                 Minecraft.getInstance().getTextureManager().register(loc, tex);
-                return new TextureInfo(loc, hasAlpha);
+                return new TextureInfo(loc, alphaMask);
             }
         } catch (Exception e) {
             PolygonTrainMod.LOGGER.debug("Could not load texture {}: {}", path, e.getMessage());
         }
         ResourceLocation fallback = fallbackTexture();
-        return new TextureInfo(fallback, false);
+        return new TextureInfo(fallback, AlphaMask.EMPTY);
     }
 
-    private static boolean imageHasAlpha(BufferedImage image) {
+    private static AlphaMask readAlphaMask(BufferedImage image) {
         if (image == null || !image.getColorModel().hasAlpha()) {
-            return false;
+            return AlphaMask.EMPTY;
         }
         int width = image.getWidth();
         int height = image.getHeight();
+        BitSet transparentPixels = new BitSet(width * height);
         for (int y = 0; y < height; y++) {
             for (int x = 0; x < width; x++) {
                 if (((image.getRGB(x, y) >>> 24) & 0xFF) < 255) {
-                    return true;
+                    transparentPixels.set(y * width + x);
                 }
             }
         }
-        return false;
+        return transparentPixels.isEmpty() ? AlphaMask.EMPTY : new AlphaMask(width, height, transparentPixels);
     }
 
     private static ResourceLocation fallbackTexture() {
@@ -1042,11 +1049,89 @@ public final class MqoModelLoader {
 
     private static final class TextureInfo {
         final ResourceLocation location;
-        final boolean hasAlpha;
+        final AlphaMask alphaMask;
 
-        TextureInfo(ResourceLocation location, boolean hasAlpha) {
+        TextureInfo(ResourceLocation location, AlphaMask alphaMask) {
             this.location = location;
-            this.hasAlpha = hasAlpha;
+            this.alphaMask = alphaMask == null ? AlphaMask.EMPTY : alphaMask;
+        }
+
+        boolean isTranslucent(float[] uvs, int vertexCount) {
+            if (uvs == null || uvs.length < vertexCount * 2) {
+                return alphaMask.hasAnyTransparency();
+            }
+            return alphaMask.intersectsUvBounds(uvs, vertexCount);
+        }
+    }
+
+    private static final class AlphaMask {
+        static final AlphaMask EMPTY = new AlphaMask(0, 0, new BitSet());
+
+        final int width;
+        final int height;
+        final BitSet transparentPixels;
+
+        AlphaMask(int width, int height, BitSet transparentPixels) {
+            this.width = width;
+            this.height = height;
+            this.transparentPixels = transparentPixels;
+        }
+
+        boolean hasAnyTransparency() {
+            return !transparentPixels.isEmpty();
+        }
+
+        boolean intersectsUvBounds(float[] uvs, int vertexCount) {
+            if (width <= 0 || height <= 0 || transparentPixels.isEmpty()) {
+                return false;
+            }
+            float minU = Float.POSITIVE_INFINITY;
+            float maxU = Float.NEGATIVE_INFINITY;
+            float minV = Float.POSITIVE_INFINITY;
+            float maxV = Float.NEGATIVE_INFINITY;
+            for (int i = 0; i < vertexCount; i++) {
+                float u = wrapUv(uvs[i * 2]);
+                float v = wrapUv(uvs[i * 2 + 1]);
+                minU = Math.min(minU, u);
+                maxU = Math.max(maxU, u);
+                minV = Math.min(minV, v);
+                maxV = Math.max(maxV, v);
+            }
+            int startX = uvToPixel(minU, width);
+            int endX = uvToPixel(maxU, width);
+            int startY = uvToPixel(minV, height);
+            int endY = uvToPixel(maxV, height);
+            for (int y = startY; y <= endY; y++) {
+                // BitSet を行単位で見ると、画像全体を毎回走査せずに透明画素を探せる。
+                int rowStart = y * width + startX;
+                int hit = transparentPixels.nextSetBit(rowStart);
+                if (hit >= 0 && hit <= y * width + endX) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        private static float wrapUv(float value) {
+            if (!Float.isFinite(value)) {
+                return 0.0F;
+            }
+            float wrapped = value % 1.0F;
+            if (wrapped < 0.0F) {
+                wrapped += 1.0F;
+            }
+            if (value == 1.0F) {
+                return 1.0F;
+            }
+            return wrapped;
+        }
+
+        private static int uvToPixel(float uv, int size) {
+            if (size <= 1) {
+                return 0;
+            }
+            float clamped = Math.max(0.0F, Math.min(1.0F, uv));
+            return Math.min(size - 1, Math.max(0, Math.round(clamped * (size - 1))));
         }
     }
 
@@ -1236,7 +1321,7 @@ public final class MqoModelLoader {
                                     boolean translucent, GroupPredicate groupFilter, GroupTransform groupTransform, TrainScriptSystem.ScriptModelRenderer scriptRenderer) {
             for (Batch batch : batches) {
                 if (groupFilter != null && !groupFilter.shouldRender(batch.groupName)) continue;
-                if (groupFilter == null && translucent != batch.translucent) continue;
+                if (translucent != batch.translucent) continue;
                 if (scriptRenderer != null) {
                     scriptRenderer.currentMatId = batch.materialId;
                 }
@@ -1252,7 +1337,7 @@ public final class MqoModelLoader {
                     Matrix3f norm = pose.normal();
                     boolean scriptTexture = scriptRenderer != null && scriptRenderer.getBoundTexture() != null;
                     ResourceLocation texture = scriptTexture ? scriptRenderer.getBoundTexture() : batch.texture;
-                    boolean needsBlend = translucent && (scriptTexture || batch.translucent || groupFilter != null);
+                    boolean needsBlend = translucent && (scriptTexture || batch.translucent);
                     RenderType renderType = needsBlend
                         ? RenderType.entityTranslucent(texture)
                         : RenderType.entityCutoutNoCull(texture);
@@ -1325,11 +1410,6 @@ public final class MqoModelLoader {
         model.render(poseStack, buffer, packedLight, net.minecraft.client.renderer.texture.OverlayTexture.NO_OVERLAY, groupFilter);
     }
 
-    public static void renderModelWithoutScript(MqoModel model, PoseStack poseStack, MultiBufferSource buffer, int packedLight, int overlay, boolean translucent, GroupPredicate groupFilter) {
-        if (model == null) return;
-        model.renderInternal(poseStack, buffer, packedLight, overlay, translucent, groupFilter, null, null);
-    }
-
     public static void renderModelWithoutScript(MqoModel model, PoseStack poseStack, MultiBufferSource buffer, int packedLight, int overlay, boolean translucent, GroupPredicate groupFilter, TrainScriptSystem.ScriptModelRenderer renderer) {
         if (model == null) return;
         model.renderInternal(poseStack, buffer, packedLight, overlay, translucent, groupFilter, null, renderer);
@@ -1379,7 +1459,7 @@ public final class MqoModelLoader {
     }
 
     public static final class ScriptMaterialTexture {
-        public final ScriptMaterial material;
+        public ScriptMaterial material;
 
         ScriptMaterialTexture(ScriptMaterial material) {
             this.material = material;
@@ -1387,7 +1467,7 @@ public final class MqoModelLoader {
     }
 
     public static final class ScriptMaterial {
-        public final ScriptTexture texture;
+        public Object texture;
 
         ScriptMaterial(ResourceLocation texture) {
             this.texture = new ScriptTexture(texture);
@@ -1395,18 +1475,24 @@ public final class MqoModelLoader {
     }
 
     public static final class ScriptTexture {
-        private final ResourceLocation resource;
+        public String namespace;
+        public String domain;
+        public String path;
+        public String resourcePath;
 
         ScriptTexture(ResourceLocation resource) {
-            this.resource = resource;
+            this.namespace = resource.getNamespace();
+            this.domain = this.namespace;
+            this.path = resource.getPath();
+            this.resourcePath = this.path;
         }
 
         public String func_110624_b() {
-            return resource.getNamespace();
+            return namespace;
         }
 
         public String func_110623_a() {
-            return resource.getPath();
+            return path;
         }
     }
 }

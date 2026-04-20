@@ -46,6 +46,7 @@ public final class RailPreviewRenderer {
         if (mc.player == null || mc.level == null) {
             return;
         }
+        WrenchItem.clearInvalidPreviewTags(mc.player, mc.level);
         ItemStack stack = findPreviewStack(mc);
         if (stack.isEmpty()) {
             return;

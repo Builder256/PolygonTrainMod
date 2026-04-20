@@ -124,7 +124,7 @@ public class MarkerBlock extends BaseEntityBlock {
         if (stack.getItem() instanceof RailItem) {
             if (!level.isClientSide()) {
                 String selectedId = stack.get(PolygonTrainModComponents.SELECTED_MODEL_ID.get());
-                boolean created = onMarkerRailClicked(level, pos, player, stack, selectedId);
+                boolean created = placeRailFromItem(level, pos, player, stack, selectedId);
                 if (created && !player.getAbilities().instabuild) {
                     stack.shrink(1);
                 }
@@ -134,7 +134,7 @@ public class MarkerBlock extends BaseEntityBlock {
         return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
     }
 
-    private boolean onMarkerRailClicked(Level level, BlockPos pos, Player player, ItemStack stack, @Nullable String selectedModelId) {
+    public static boolean placeRailFromItem(Level level, BlockPos pos, Player player, ItemStack stack, @Nullable String selectedModelId) {
         ItemStack previewStack = stack;
         CompoundTag startTag = stack.get(PolygonTrainModComponents.RAIL_PREVIEW_START.get());
         if (startTag == null) {
@@ -148,8 +148,10 @@ public class MarkerBlock extends BaseEntityBlock {
             }
         }
         if (startTag == null || !startTag.contains("X") || !startTag.contains("Y") || !startTag.contains("Z")) {
-            if (searchAllMarkers(level, pos).size() >= 2) {
-                boolean created = onMarkerActivated(level, pos, player, true, selectedModelId);
+            // プレビュー無しの右クリックは、近くのマーカー群から従来どおり即敷設へ流す。
+            MarkerBlock block = level.getBlockState(pos).getBlock() instanceof MarkerBlock markerBlock ? markerBlock : null;
+            if (block != null && block.searchAllMarkers(level, pos).size() >= 2) {
+                boolean created = block.onMarkerActivated(level, pos, player, true, selectedModelId);
                 if (created) {
                     player.displayClientMessage(Component.literal("レールを接続しました"), true);
                 }
@@ -225,6 +227,7 @@ public class MarkerBlock extends BaseEntityBlock {
         boolean createdAny = false;
         for (int i = 0; i < segments.size(); i++) {
             CompoundTag segment = segments.getCompound(i);
+            // レンチで保持したアンカーをそのまま各セグメントへ戻すと、確定後の形がぶれにくい。
             RailPosition start = WrenchItem.applyControlHandle(rawStart, segment, true);
             RailPosition endRaw = RailPosition.readFromNBT(segment.getCompound("EndRP"));
             if (endRaw == null) {
@@ -235,7 +238,7 @@ public class MarkerBlock extends BaseEntityBlock {
             end.addHeight((double) (prop.blockHeight - 0.0625F));
             boolean created = multiple
                 ? createOrAppendBranchRail(level, startPos, copyRailPosition(start), copyRailPosition(end), prop, isCreative, selectedModelId)
-                : createRail(level, startPos, List.of(copyRailPosition(start), copyRailPosition(end)), prop, true, isCreative, selectedModelId);
+                : createNormalRail(level, copyRailPosition(start), copyRailPosition(end), prop, true, isCreative, selectedModelId);
             createdAny |= created;
         }
         return createdAny;

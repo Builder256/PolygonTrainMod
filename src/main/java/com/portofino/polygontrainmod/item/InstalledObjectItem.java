@@ -78,6 +78,15 @@ public class InstalledObjectItem extends Item implements ModelSelectableItem {
             level.setBlock(placePos, PolygonTrainModBlocks.INSTALLED_OBJECT.get().defaultBlockState(), 3);
             if (level.getBlockEntity(placePos) instanceof InstalledObjectBlockEntity blockEntity) {
                 blockEntity.setDefinition(definition.getId(), category, player.getYRot());
+                if (category == InstalledObjectCategory.SIGNAL) {
+                    // 当たり判定は変えず、見た目だけ柱の内側へ寄せる。
+                    double yawRad = Math.toRadians(player.getYRot());
+                    double inwardX = -Math.sin(yawRad) * 0.72D;
+                    double inwardZ = Math.cos(yawRad) * 0.72D;
+                    blockEntity.setRenderOffset(inwardX, 0.0D, inwardZ);
+                } else {
+                    blockEntity.setRenderOffset(0.0D, 0.0D, 0.0D);
+                }
                 level.sendBlockUpdated(placePos, blockEntity.getBlockState(), blockEntity.getBlockState(), 3);
             }
             if (!player.getAbilities().instabuild) {

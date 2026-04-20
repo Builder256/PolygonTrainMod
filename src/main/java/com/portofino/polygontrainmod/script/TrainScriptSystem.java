@@ -100,6 +100,10 @@ public class TrainScriptSystem {
     }
 
     public static void loadScript(String scriptPath, Object model) {
+        loadScriptFromPath(scriptPath, model, null);
+    }
+
+    public static void loadScriptFromPath(String scriptPath, Object model, String modelName) {
         PolygonTrainMod.LOGGER.info("legacy script load requested: {} for model {}", scriptPath, model == null ? "null" : model.getClass().getSimpleName());
         try {
             ScriptEngine scriptEngine = createScriptEngine();
@@ -112,7 +116,7 @@ public class TrainScriptSystem {
             if (Files.exists(path)) {
                 PolygonTrainMod.LOGGER.info("Loading script from filesystem path: {}", path);
                 String script = Files.readString(path);
-                loadScript(scriptPath, script, model, scriptEngine);
+                loadScript(scriptPath, script, model, modelName, scriptEngine);
             } else {
                 PolygonTrainMod.LOGGER.info("Script path not found on filesystem, skipping direct load: {}", scriptPath);
             }
@@ -122,6 +126,10 @@ public class TrainScriptSystem {
     }
 
     public static void loadScript(String scriptPath, String script, Object model) {
+        loadScript(scriptPath, script, model, null);
+    }
+
+    public static void loadScript(String scriptPath, String script, Object model, String modelName) {
         PolygonTrainMod.LOGGER.info("legacy script load requested from content: {} for model {}", scriptPath, model == null ? "null" : model.getClass().getSimpleName());
         try {
             ScriptEngine scriptEngine = createScriptEngine();
@@ -129,7 +137,7 @@ public class TrainScriptSystem {
                 PolygonTrainMod.LOGGER.warn("JavaScript engine not available for model script: {}", scriptPath);
                 return;
             }
-            loadScript(scriptPath, script, model, scriptEngine);
+            loadScript(scriptPath, script, model, modelName, scriptEngine);
         } catch (Exception e) {
             PolygonTrainMod.LOGGER.error("Failed to load script for model: {}", scriptPath, e);
         }
@@ -195,10 +203,10 @@ public class TrainScriptSystem {
         return null;
     }
 
-    private static void loadScript(String scriptPath, String script, Object model, ScriptEngine scriptEngine) {
+    private static void loadScript(String scriptPath, String script, Object model, String modelName, ScriptEngine scriptEngine) {
         PolygonTrainMod.LOGGER.info("Executing model script: {} (model={})", scriptPath, model == null ? "null" : model.getClass().getSimpleName());
         try {
-            ScriptModelRenderer renderer = new ScriptModelRenderer(model);
+            ScriptModelRenderer renderer = new ScriptModelRenderer(model, modelName);
             injectScriptCompatibility(scriptEngine, renderer);
             script = normalizeLegacyScriptReferences(script);
             scriptEngine.eval(script);
@@ -636,6 +644,7 @@ public class TrainScriptSystem {
     public static final class ScriptModelRenderer {
         private final Object model;
         private final MqoModelLoader.MqoModel mqoModel;
+        private final String defaultModelName;
         private PoseStack poseStack;
         private MultiBufferSource buffer;
         private int packedLight;
@@ -651,11 +660,13 @@ public class TrainScriptSystem {
         private float uvV1 = 1.0F;
         private int matrixDepth = 0;
         private int renderPartsCalls = 0;
+        private final Map<Long, Object> scriptData = new HashMap<>();
         public final ScriptModelRenderer renderer = this;
 
-        public ScriptModelRenderer(Object model) {
+        public ScriptModelRenderer(Object model, String defaultModelName) {
             this.model = model;
             this.mqoModel = model instanceof MqoModelLoader.MqoModel m ? m : null;
+            this.defaultModelName = defaultModelName == null ? "" : defaultModelName;
         }
 
         public Object getModel() {
@@ -663,6 +674,20 @@ public class TrainScriptSystem {
                 return mqoModel.getScriptModel();
             }
             return model;
+        }
+
+        /**
+         * Returns the model object expected by legacy render scripts.
+         */
+        public Object getModelObject() {
+            return getModel();
+        }
+
+        /**
+         * Returns the model object as a legacy model-set placeholder.
+         */
+        public Object getModelSet() {
+            return getModel();
         }
 
         public Object registerParts(Object parts) {
@@ -674,14 +699,20 @@ public class TrainScriptSystem {
         }
 
         public String getResourceName() {
-            return "train";
+            if (currentEntity instanceof TrainEntity train) {
+                return train.getVehicleId();
+            }
+            return defaultModelName.isBlank() ? "train" : defaultModelName;
         }
 
         public String getModelName() {
+            if (currentEntity instanceof TrainEntity train) {
+                return train.getVehicleId();
+            }
             if (currentEntity instanceof InstalledObjectBlockEntity blockEntity) {
                 return blockEntity.getModelName();
             }
-            return "";
+            return defaultModelName;
         }
 
         public void setRenderContext(PoseStack poseStack, MultiBufferSource buffer, int packedLight, int overlay, int pass, Object entity) {
@@ -778,12 +809,36 @@ public class TrainScriptSystem {
                 return;
             }
             try {
-                Object domain = texture.getClass().getMethod("func_110624_b").invoke(texture);
-                Object path = texture.getClass().getMethod("func_110623_a").invoke(texture);
-                bindScriptTexture(String.valueOf(domain), String.valueOf(path), 0);
-            } catch (Exception ignored) {
+                String domain = readTextureComponent(texture, "func_110624_b", "namespace", "domain");
+                String path = readTextureComponent(texture, "func_110623_a", "path", "resourcePath");
+                if (path == null || path.isBlank()) {
+                    clearScriptTexture();
+                    return;
+                }
+                bindScriptTexture(domain == null || domain.isBlank() ? "minecraft" : domain, path, 0);
+            } catch (Exception e) {
                 clearScriptTexture();
             }
+        }
+
+        private static String readTextureComponent(Object texture, String methodName, String... fieldNames) {
+            try {
+                Object value = texture.getClass().getMethod(methodName).invoke(texture);
+                if (value != null) {
+                    return String.valueOf(value);
+                }
+            } catch (Exception ignored) {
+            }
+            for (String fieldName : fieldNames) {
+                try {
+                    Object value = texture.getClass().getField(fieldName).get(texture);
+                    if (value != null) {
+                        return String.valueOf(value);
+                    }
+                } catch (Exception ignored) {
+                }
+            }
+            return null;
         }
 
         /**
@@ -906,6 +961,20 @@ public class TrainScriptSystem {
             } catch (Exception ignored) {
             }
             return 0;
+        }
+
+        /**
+         * Returns legacy renderer scratch data addressed by an integer key.
+         */
+        public Object getData(long key) {
+            return scriptData.getOrDefault(key, 0);
+        }
+
+        /**
+         * Stores legacy renderer scratch data addressed by an integer key.
+         */
+        public void setData(long key, Object value) {
+            scriptData.put(key, value == null ? 0 : value);
         }
 
         public int getMCHour(Object entity) {

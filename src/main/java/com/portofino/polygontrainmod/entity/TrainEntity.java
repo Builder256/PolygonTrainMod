@@ -562,8 +562,14 @@ public class TrainEntity extends Entity {
         doorMoveR = approach(doorMoveR, isDoorRightOpen() ? 60.0F : 0.0F, 1.0F);
         pantograph_F = approach(pantograph_F, isPantographUp() ? 40.0F : 0.0F, 1.0F);
         pantograph_B = approach(pantograph_B, isPantographUp() ? 40.0F : 0.0F, 1.0F);
-        Entity driver = getDriverPassenger();
-        seatRotation = driver == null ? 0.0F : Mth.wrapDegrees(driver.getYRot() - getYRot());
+        float direction = getTrainDirection();
+        // 座席 script 側は -45〜45 度前提なので、進行方向へゆっくり寄せていく。
+        if (direction < 0.0F && seatRotation > -45.0F) {
+            seatRotation -= 1.0F;
+        } else if (direction > 0.0F && seatRotation < 45.0F) {
+            seatRotation += 1.0F;
+        }
+        seatRotation = Mth.clamp(seatRotation, -45.0F, 45.0F);
     }
 
     private boolean canTravelOnRail(Vec3 worldPos) {
@@ -1984,7 +1990,7 @@ public class TrainEntity extends Entity {
     }
 
     public float getSeatRotation() {
-        return 0.0F;
+        return Mth.clamp(seatRotation / 45.0F, -1.0F, 1.0F);
     }
 
     public FormationCompat getFormation() {
